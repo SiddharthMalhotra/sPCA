@@ -18,4 +18,4 @@
 #	[<Error sampling rate>](optional): The error sampling rate [0-1] that is used for computing the error, It can be set to 0.01 to compute the error for only a small sample of the matrix, this speeds up the computations significantly) 
 # 	[<max iterations>] (optional): Maximum number of iterations before terminating, the default is 3
 
-$SPARK_HOME/bin/spark-submit --class "org.qcri.sparkpca.SparkPCA.java" --master local target/sparkPCA-1.0.jar seqfiles output.txt 7 5 3 1 3
+$SPARK_HOME/bin/spark-submit --class org.qcri.sparkpca.SparkPCA --master local target/sparkPCA-1.0.jar seqfiles output.txt 7 5 3 1 3
