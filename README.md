@@ -7,7 +7,7 @@ Scalable PCA (sPCA) is a scalable implementation of Principal component analysis
 Download and Install Spark
 ==========================
 
-Download  Spark 1.0.0+ [here](https://spark.apache.org/downloads.html). After Spark is downloaded, build it using the following command, we refer to the directory where spark is downloaded by **SPARK_HOME**.
+Download  Spark 1.0.0+ [here](https://spark.apache.org/downloads.html). After Spark is downloaded, build it using the following command, we refer to the directory where spark is downloaded by `SPARK_HOME`.
 
 ```
 SPARK_HOME/sbt/sbt assembly
@@ -43,11 +43,11 @@ To make sure that the code is build successfully, You should see something like 
 [INFO] BUILD SUCCESS
 [INFO] ------------------------------------------------------------------------
 ```
-Moreover, you will find a .jar file generated under **ScalablePCA/target/SparkPCA.jar**. This jar file will be used to run the example in the following step.
+Moreover, you will find a .jar file generated under `ScalablePCA/target/SparkPCA.jar`. This jar file will be used to run the example in the following step.
 
 Running ScalablePCA in the local mode
 =====================================
-The next step is to run sPCA on a small toy matrix. There is an example script located in **ScalablePCA/spca-example.sh**. you can run it through the following command:
+The next step is to run sPCA on a small toy matrix. There is an example script located in `ScalablePCA/spca-example.sh`. you can run it through the following command:
 ```
 ./ScalablePCA/spca-example.sh
 ```
