@@ -7,7 +7,7 @@ Scalable PCA (sPCA) is a scalable implementation of Principal component analysis
 Download and Install Spark
 ==========================
 
-Download  Spark 1.0.0+ [here](https://spark.apache.org/downloads.html). After Spark is downloaded, build it using the following command:
+Download  Spark 1.0.0+ [here](https://spark.apache.org/downloads.html). After Spark is downloaded, build it using the following command, we refer to the directory where spark is downloaded by **SPARK_HOME**.
 
 ```
 $SPARK_HOME/sbt/sbt assembly
@@ -15,8 +15,9 @@ $SPARK_HOME/sbt/sbt assembly
 
 You can also build Spark using Maven by following [this tutorial] (http://spark.apache.org/docs/1.0.0/building-with-maven.html).
 Verify that Spark is running by executing the SparkPi example. In the shell, run the following command:
-<code snippet>
-
+```
+SPARK_HOME/bin/run-example SparkPi 10
+```
 After the above Spark local program finishes, you should see the computed value of pi (something that's reasonably closer to 3.14).
 
 Clone the ScalablePCA repo
