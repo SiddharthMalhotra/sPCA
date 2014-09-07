@@ -1,6 +1,6 @@
 # Before running this script you should set the enviroment variable SPARK_HOME (e.g. export SPARK_HOME=/path/to/spark_home_dirrectory)
 # Usage:
-# --class org.qcri.sparkpca.SparkPCA.java
+# --class org.qcri.sparkpca.SparkPCA
 #  --master <master-url> \
 #  ... # other options
 #  ./target/sparkPCA-1.0.jar \
