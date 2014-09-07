@@ -54,8 +54,8 @@ The example involves a command similar to the following:
 ```
 SPARK_HOME/bin/spark-submit --class org.qcri.sparkpca.SparkPCA --master <master-url> target/sparkPCA-1.0.jar  <path/to/input/matrix> <path/to/outputfile> <number of rows> <number of columns> <number of principal components> [<Error sampling rate>] [<max iterations>]
 ```
-This command runs the main class in the local mode using the following parameters in the following order:
-- `<master-url>: `The master URL for the cluster (e.g. spark://23.195.26.187:7077), it is set to local for running locally local mode 
+This command runs runs sPCA on the local mode of Spark with one worker thread. The following is a description of the command-line arguments of sPCA. 
+- `<master-url>: `The master URL for the cluster (e.g. spark://23.195.26.187:7077), it is set to `local[2]` for running Spark in the local mode with two threads. It can also run locally on one worker thread (i.e., no parlellism at all) if this arguments is set to `local`
 -	`<path/to/input/matrix>:` directory that contains an example input matrix in the sequenceFileFormat `<IntWritable key, VectorWritable value>`.
 -	`<path/to/outputfile>:` The file where the resulting principal components is written
 -	`<number of rows>:` Number of rows for the input matrix 
@@ -63,8 +63,4 @@ This command runs the main class in the local mode using the following parameter
 -	`<number of principal components>:` Number of desired principal components 
 -	`[<Error sampling rate>](optional):` The error sampling rate [0-1] that is used for computing the error, It can be set to 0.01 to compute the error for only a small sample of the matrix, this speeds up the computations significantly 
 - `[<max iterations>] (optional):` Maximum number of iterations before terminating, the default is 3 
-
-Running ScalablePCA on amazon ec2 cluster
-=========================================
-
 
