@@ -23,7 +23,7 @@ Clone the ScalablePCA repo
 ==========================
 Open the shell and clone the ScalablePCA github repo:
 ```
-git clone git://github.com/lintool/Cloud9.git
+git clone https://github.com/Qatar-Computing-Research-Institute/ScalablePCA
 ```
 In order to build sPCA source code, you need to install maven. You can download and install maven by folliwng this [quick tutorial] (http://maven.apache.org/guides/getting-started/maven-in-five-minutes.html). To verify that maven is installed, run the following 
 command:
