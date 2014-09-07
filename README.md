@@ -11,7 +11,6 @@ Download  Spark 1.0.0+ [here](https://spark.apache.org/downloads.html). After Sp
 
 ```
 $SPARK_HOME/sbt/sbt assembly
-}
 ```
 
 You can also build Spark using Maven by following [this tutorial] (http://spark.apache.org/docs/1.0.0/building-with-maven.html).
@@ -23,25 +22,43 @@ After the above Spark local program finishes, you should see the computed value 
 Clone the ScalablePCA repo
 ==========================
 Open the shell and clone the ScalablePCA github repo:
-
+```
 git clone git://github.com/lintool/Cloud9.git
-
-In order to build sPCA source code, you need to install maven. You can download and install maven by folliwng this [quick tutorial] (http://maven.apache.org/guides/getting-started/maven-in-five-minutes.html). To verify that maven is installed, run the following command:
-
+```
+In order to build sPCA source code, you need to install maven. You can download and install maven by folliwng this [quick tutorial] (http://maven.apache.org/guides/getting-started/maven-in-five-minutes.html). To verify that maven is installed, run the following 
+command:
+```
 mvn --version
-
+```
 It should print out your installed version of Maven. After that, you can build sPCA by typing:
 
+```
+cd ScalablePCA/
 mvn package
-
+```
 Put here Build Successful
 
-this command will build the code and you will find a .jar file generated under ScalablePCA/target/SparkPCA.jar
+this command will build the code and you will find a .jar file generated under **ScalablePCA/target/SparkPCA.jar**
 
 
 Running ScalablePCA in the local mode
 =====================================
-
+The next step is to run sPCA on a small toy matrix. There is an example script located in **ScalablePCA/spca-example.sh**. you can run it through the following command:
+```
+./ScalablePCA/spca-example.sh
+```
+The example involves a command similar to the following:
+```
+SPARK_HOME/bin/spark-submit --class "org.qcri.sparkpca.SparkPCA.java" --master local target/SparkPCA-1.0.jar seqfiles output.txt 7 5 3 1 3
+```
+This command runs the main class in the local mode using the following parameters in the following order:
+- Input path: seqfiles (directory that contains the input matrix in the sequenceFileFormat <IntWritable key, VectorWritable value>.
+- Output path: output.txt (The file that contains the resulting prinipal components)
+- Number of rows for the input matrix : 7 
+- Number of columns for the input matrix : 5 
+- Number of desired principal components : 3 
+- The error sampling rate [0-1]: 1 (It is used for computing the error, It can be set to 0.01 to compute the error for only a small sample of the matrix, this speeds up the computations significantly) 
+- Maximum iterations: 3 (Maximum number of iterations before terminating, the default is 3) 
 
 Running ScalablePCA on amazon ec2 cluster
 =========================================
