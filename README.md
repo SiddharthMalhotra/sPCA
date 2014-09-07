@@ -7,9 +7,13 @@ Scalable PCA (sPCA) is a scalable implementation of Principal component analysis
 Download and Install Spark
 ==========================
 
+Download  Spark 1.0.0+ [here](https://spark.apache.org/downloads.html). Verify that Spark is running by running the SparkPi example. In the shell, running the following command
+<if (x==5)>
+
 
 Clone the ScalablePCA repo
 ==========================
+
 
 
 Running ScalablePCA in the local mode
