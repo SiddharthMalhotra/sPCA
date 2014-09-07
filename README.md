@@ -43,8 +43,7 @@ To make sure that the code is build successfully, You should see something like 
 [INFO] BUILD SUCCESS
 [INFO] ------------------------------------------------------------------------
 ```
-this command will build the code and you will find a .jar file generated under **ScalablePCA/target/SparkPCA.jar**
-
+Moreover, you will find a .jar file generated under **ScalablePCA/target/SparkPCA.jar**. This jar file will be used to run the example in the following step.
 
 Running ScalablePCA in the local mode
 =====================================
@@ -57,7 +56,7 @@ The example involves a command similar to the following:
 SPARK_HOME/bin/spark-submit --class "org.qcri.sparkpca.SparkPCA.java" --master local target/SparkPCA-1.0.jar seqfiles output.txt 7 5 3 1 3
 ```
 This command runs the main class in the local mode using the following parameters in the following order:
-- Input path: seqfiles (directory that contains the input matrix in the sequenceFileFormat <IntWritable key, VectorWritable value>.
+- Input path: seqfiles (directory that contains an example input matrix in the sequenceFileFormat <IntWritable key, VectorWritable value>.
 - Output path: output.txt (The file that contains the resulting prinipal components)
 - Number of rows for the input matrix : 7 
 - Number of columns for the input matrix : 5 
