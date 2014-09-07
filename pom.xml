@@ -1,7 +1,7 @@
 <project>
   <groupId>edu.berkeley</groupId>
   <artifactId>sparkPCA</artifactId>
-  <modelVersion>1.0.0</modelVersion>
+  <modelVersion>4.0.0</modelVersion>
   <name>Spark Principal component analysis </name>
   <packaging>jar</packaging>
   <version>1.0</version>
