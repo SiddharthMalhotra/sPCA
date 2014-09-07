@@ -10,7 +10,7 @@ Download and Install Spark
 Download  Spark 1.0.0+ [here](https://spark.apache.org/downloads.html). After Spark is downloaded, build it using the following command, we refer to the directory where spark is downloaded by **SPARK_HOME**.
 
 ```
-$SPARK_HOME/sbt/sbt assembly
+SPARK_HOME/sbt/sbt assembly
 ```
 
 You can also build Spark using Maven by following [this tutorial] (http://spark.apache.org/docs/1.0.0/building-with-maven.html).
