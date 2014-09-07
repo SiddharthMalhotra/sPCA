@@ -17,7 +17,7 @@ Verify that Spark is running by executing the SparkPi example. In the shell, run
 ```
 SPARK_HOME/bin/run-example SparkPi 10
 ```
-After the above Spark local program finishes, you should see the computed value of pi (something that's reasonably closer to 3.14).
+After the above Spark local program finishes, you should see the computed value of pi (something that's reasonably close to 3.14).
 
 Clone the ScalablePCA repo
 ==========================
