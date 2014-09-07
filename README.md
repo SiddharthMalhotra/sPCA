@@ -53,7 +53,7 @@ The next step is to run sPCA on a small toy matrix. There is an example script l
 ```
 The example involves a command similar to the following:
 ```
-SPARK_HOME/bin/spark-submit --class "org.qcri.sparkpca.SparkPCA.java" --master local target/sparkPCA-1.0.jar seqfiles output.txt 7 5 3 1 3
+SPARK_HOME/bin/spark-submit --class "org.qcri.sparkpca.SparkPCA.java" --master <master-url> target/sparkPCA-1.0.jar  <path/to/input/matrix> <path/to/outputfile> <number of rows> <number of columns> <number of principal components> [Error sampling rate] [max iterations]
 ```
 This command runs the main class in the local mode using the following parameters in the following order:
 - Input path: seqfiles (directory that contains an example input matrix in the sequenceFileFormat <IntWritable key, VectorWritable value>.
