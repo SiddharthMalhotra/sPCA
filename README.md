@@ -13,7 +13,8 @@ Download  Spark 1.0.0+ [here](https://spark.apache.org/downloads.html). After Sp
 SPARK_HOME/sbt/sbt assembly
 ```
 
-You can also build Spark using Maven by following [this tutorial] (http://spark.apache.org/docs/1.0.0/building-with-maven.html).
+You can also build Spark using Maven by following [this] (http://spark.apache.org/docs/1.0.0/building-with-maven.html) tutorial.
+
 Verify that Spark is running by executing the SparkPi example. In the shell, run the following command:
 ```
 SPARK_HOME/bin/run-example SparkPi 10
