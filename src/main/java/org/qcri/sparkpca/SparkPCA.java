@@ -103,6 +103,8 @@ public class SparkPCA implements Serializable {
 	     
 	     //save principal components
 	     PCAUtils.printMatrixToFile(principalComponentsMatrix, outputPath);
+	     
+	     log.info("Principal components computed successfully");
 	 }
      
      /**
