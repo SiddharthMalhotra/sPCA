@@ -37,8 +37,12 @@ It should print out your installed version of Maven. After that, you can build s
 cd ScalablePCA/
 mvn package
 ```
-Put here Build Successful
-
+To make sure that the code is build successfully, You should see something like the following:
+```
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD SUCCESS
+[INFO] ------------------------------------------------------------------------
+```
 this command will build the code and you will find a .jar file generated under **ScalablePCA/target/SparkPCA.jar**
 
 
