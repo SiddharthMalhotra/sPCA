@@ -53,7 +53,7 @@ The next step is to run sPCA on a small toy matrix. There is an example script l
 ```
 The example involves a command similar to the following:
 ```
-SPARK_HOME/bin/spark-submit --class "org.qcri.sparkpca.SparkPCA" --master <master-url> target/sparkPCA-1.0.jar  <path/to/input/matrix> <path/to/outputfile> <number of rows> <number of columns> <number of principal components> [<Error sampling rate>] [<max iterations>]
+SPARK_HOME/bin/spark-submit --class org.qcri.sparkpca.SparkPCA --master <master-url> target/sparkPCA-1.0.jar  <path/to/input/matrix> <path/to/outputfile> <number of rows> <number of columns> <number of principal components> [<Error sampling rate>] [<max iterations>]
 ```
 This command runs the main class in the local mode using the following parameters in the following order:
 - `<master-url>: `The master URL for the cluster (e.g. spark://23.195.26.187:7077), it is set to local for running locally local mode 
