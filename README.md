@@ -6,8 +6,7 @@ Scalable PCA (sPCA) is a scalable implementation of Principal component analysis
 Download and Install Spark
 ==========================
 
-Download  Spark 1.0.0+ [here](https://spark.apache.org/downloads.html). After Spark is downloaded, build it using the following command, we refer to the directory where spark is downloaded by `SPARK_HOME`.
-
+Download  Spark 1.0.0+ [here](https://spark.apache.org/downloads.html). We refer to the directory where spark is downloaded by `SPARK_HOME`. After Spark is downloaded, build it using the following command:
 ```
 SPARK_HOME/sbt/sbt assembly
 ```
