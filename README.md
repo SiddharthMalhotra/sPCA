@@ -57,12 +57,12 @@ SPARK_HOME/bin/spark-submit --class "org.qcri.sparkpca.SparkPCA.java" --master <
 ```
 This command runs the main class in the local mode using the following parameters in the following order:
 - `<master-url>: `The master URL for the cluster (e.g. spark://23.195.26.187:7077), it is set to local for running locally local mode 
--	`<path/to/input/matrix>:` directory that contains an example input matrix in the sequenceFileFormat <IntWritable key, VectorWritable value>.
+-	`<path/to/input/matrix>:` directory that contains an example input matrix in the sequenceFileFormat `<IntWritable key, VectorWritable value>`.
 -	`<path/to/outputfile>:` The file where the resulting principal components is written
 -	`<number of rows>:` Number of rows for the input matrix 
 -	`<number of columns>:` Number of columns for the input matrix : 5 
 -	`<number of principal components>:` Number of desired principal components 
--	`[<Error sampling rate>](optional):` The error sampling rate [0-1] that is used for computing the error, It can be set to 0.01 to compute the error for only a small sample of the matrix, this speeds up the computations significantly) 
+-	`[<Error sampling rate>](optional):` The error sampling rate [0-1] that is used for computing the error, It can be set to 0.01 to compute the error for only a small sample of the matrix, this speeds up the computations significantly 
 - `[<max iterations>] (optional):` Maximum number of iterations before terminating, the default is 3 
 
 Running ScalablePCA on amazon ec2 cluster
