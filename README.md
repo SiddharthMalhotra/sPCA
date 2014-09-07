@@ -7,7 +7,7 @@ Scalable PCA (sPCA) is a scalable implementation of Principal component analysis
 Download and Install Spark
 ==========================
 
-Download  Spark 1.0.0+ [here](https://spark.apache.org/downloads.html). After Spark is downloaded, build it using the following command, we refer to the directory where spark is downloaded by **SPARK_HOME**.
+Download  Spark 1.0.0+ [here](https://spark.apache.org/downloads.html). After Spark is downloaded, build it using the following command, we refer to the directory where spark is downloaded by `SPARK_HOME`.
 
 ```
 SPARK_HOME/sbt/sbt assembly
@@ -37,29 +37,33 @@ It should print out your installed version of Maven. After that, you can build s
 cd ScalablePCA/
 mvn package
 ```
-Put here Build Successful
-
-this command will build the code and you will find a .jar file generated under **ScalablePCA/target/SparkPCA.jar**
-
+To make sure that the code is build successfully, You should see something like the following:
+```
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD SUCCESS
+[INFO] ------------------------------------------------------------------------
+```
+Moreover, you will find a .jar file generated under `ScalablePCA/target/SparkPCA.jar`. This jar file will be used to run the example in the following step.
 
 Running ScalablePCA in the local mode
 =====================================
-The next step is to run sPCA on a small toy matrix. There is an example script located in **ScalablePCA/spca-example.sh**. you can run it through the following command:
+The next step is to run sPCA on a small toy matrix. There is an example script located in `ScalablePCA/spca-example.sh`. you can run it through the following command:
 ```
 ./ScalablePCA/spca-example.sh
 ```
 The example involves a command similar to the following:
 ```
-SPARK_HOME/bin/spark-submit --class "org.qcri.sparkpca.SparkPCA.java" --master local target/SparkPCA-1.0.jar seqfiles output.txt 7 5 3 1 3
+SPARK_HOME/bin/spark-submit --class "org.qcri.sparkpca.SparkPCA.java" --master <master-url> target/sparkPCA-1.0.jar  <path/to/input/matrix> <path/to/outputfile> <number of rows> <number of columns> <number of principal components> [<Error sampling rate>] [<max iterations>]
 ```
 This command runs the main class in the local mode using the following parameters in the following order:
-- Input path: seqfiles (directory that contains the input matrix in the sequenceFileFormat <IntWritable key, VectorWritable value>.
-- Output path: output.txt (The file that contains the resulting prinipal components)
-- Number of rows for the input matrix : 7 
-- Number of columns for the input matrix : 5 
-- Number of desired principal components : 3 
-- The error sampling rate [0-1]: 1 (It is used for computing the error, It can be set to 0.01 to compute the error for only a small sample of the matrix, this speeds up the computations significantly) 
-- Maximum iterations: 3 (Maximum number of iterations before terminating, the default is 3) 
+- `<master-url>: `The master URL for the cluster (e.g. spark://23.195.26.187:7077), it is set to local for running locally local mode 
+-	`<path/to/input/matrix>:` directory that contains an example input matrix in the sequenceFileFormat `<IntWritable key, VectorWritable value>`.
+-	`<path/to/outputfile>:` The file where the resulting principal components is written
+-	`<number of rows>:` Number of rows for the input matrix 
+-	`<number of columns>:` Number of columns for the input matrix : 5 
+-	`<number of principal components>:` Number of desired principal components 
+-	`[<Error sampling rate>](optional):` The error sampling rate [0-1] that is used for computing the error, It can be set to 0.01 to compute the error for only a small sample of the matrix, this speeds up the computations significantly 
+- `[<max iterations>] (optional):` Maximum number of iterations before terminating, the default is 3 
 
 Running ScalablePCA on amazon ec2 cluster
 =========================================
