@@ -55,7 +55,7 @@ The example involves a command similar to the following:
 SPARK_HOME/bin/spark-submit --class org.qcri.sparkpca.SparkPCA --master <master-url> target/sparkPCA-1.0.jar  <path/to/input/matrix> <path/to/outputfile> <number of rows> <number of columns> <number of principal components> [<Error sampling rate>] [<max iterations>]
 ```
 This command runs runs sPCA on the local mode of Spark with one worker thread. The following is a description of the command-line arguments of sPCA. 
-- `<master-url>: `The master URL for the cluster (e.g. spark://23.195.26.187:7077), it is set to `local[2]` for running Spark in the local mode with two threads. It can also run locally on one worker thread (i.e., no parlellism at all) if this arguments is set to `local`
+- `<master-url>: `The master URL for the cluster (e.g. spark://23.195.26.187:7077), it is set to `local[K]` for running Spark in the local mode with *K* threads (ideally, set *K* to the number of cores on your machine). If this argument is set to `local`, the applications runs locally on one worker thread (i.e., no parlellism at all).
 -	`<path/to/input/matrix>:` directory that contains an example input matrix in the sequenceFileFormat `<IntWritable key, VectorWritable value>`.
 -	`<path/to/outputfile>:` The file where the resulting principal components is written
 -	`<number of rows>:` Number of rows for the input matrix 
