@@ -1,11 +1,12 @@
 # Before running this script you should set the enviroment variable SPARK_HOME (e.g. export SPARK_HOME=/path/to/spark_home_dirrectory)
 # Usage:
+# ./bin/spark-submit \
 # --class org.qcri.sparkpca.SparkPCA
 #  --master <master-url> \
 #  ... # other options
 #  ./target/sparkPCA-1.0.jar \
 #  <path/to/input/matrix> <path/to/outputfile> <number of rows> <number of columns> <number of principal components> [<Error sampling rate>] [<max iterations>]
-# ./bin/spark-submit \
+
 
 
 # Description of arguments:

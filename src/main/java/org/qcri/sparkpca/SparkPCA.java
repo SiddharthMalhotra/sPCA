@@ -211,8 +211,12 @@ public class SparkPCA implements Serializable {
 	    centralC= PCAUtils.randomMatrix(nCols, nPCs);
 	    
 		// 1. Mean Job : This job calculates the mean and span of the columns of the input RDD<org.apache.spark.mllib.linalg.Vector>
-	    final Accumulator<double[]> matrixAccumY = sc.accumulator(new double[nCols], new VectorAccumulatorParam());
+	    final Accumulator<double[]> vectorAccumSum = sc.accumulator(new double[nCols], new VectorAccumulatorParam());
+	    final Accumulator<double[]> vectorAccumMax = sc.accumulator(new double[nCols], new VectorAccumulatorMaxParam());
+	    final Accumulator<double[]> vectorAccumMin = sc.accumulator(new double[nCols], new VectorAccumulatorMinParam());
 	    final double[] internalSumY=new double[nCols];
+	    final double[] internalMaxY=new double[nCols];
+	    final double[] internalMinY=new double[nCols];
 	    vectors.foreachPartition(new VoidFunction<Iterator<org.apache.spark.mllib.linalg.Vector>>() {
 
 	        public void call(Iterator<org.apache.spark.mllib.linalg.Vector> arg0)
@@ -224,21 +228,54 @@ public class SparkPCA implements Serializable {
 	    		{
 	    			yi=arg0.next();
 	    			indices=((SparseVector)yi).indices();
-	    			for(i=0; i< indices.length; i++ )
+	    			for(i=0; i< indices.length; i++)
     			    {
-	    				internalSumY[indices[i]]+=yi.apply(indices[i]);
+	    				double value=yi.apply(indices[i]);
+	    				internalSumY[indices[i]]+=value;
+	    				if(value > internalMaxY[indices[i]])
+	    					internalMaxY[indices[i]]=value;
+	    				if(value < internalMinY[indices[i]])
+	    					internalMinY[indices[i]]=value;
     			    }	                
 	    		}
-	    		matrixAccumY.add(internalSumY);
+	    		vectorAccumSum.add(internalSumY);
+	    		vectorAccumMax.add(internalMaxY);
+	    		vectorAccumMin.add(internalMinY);
 	        }
 
 	  });//End Mean Job
 	    
 	  //Get the sum of column Vector from the accumulator and divide each element by the number of rows to get the mean
-	  final Vector meanVector=new DenseVector(matrixAccumY.value()).divide(nRows);  
-      final Broadcast<Vector> br_ym_mahout = sc.broadcast(meanVector);
+	  final Vector meanVector=new DenseVector(vectorAccumSum.value()).divide(nRows);  
+	  final Broadcast<Vector> br_ym_mahout = sc.broadcast(meanVector);
+	  
+	  //Get the span vector by subtracting the min value from the max value of each column
+	  final Vector spanVector=new DenseVector(vectorAccumMax.value()).minus(new DenseVector(vectorAccumMin.value()));
+	  final Broadcast<Vector> br_span_mahout = sc.broadcast(spanVector);
       
-      //2. Frobenious Norm Job : Obtain Frobenius norm of the input RDD<org.apache.spark.mllib.linalg.Vector>
+	  //2. Normalize Job : Normalize a matrix by dividing each value to the span of its column. After normalization, the difference between the values in a column is <=1
+	  vectors=vectors.map(new Function<org.apache.spark.mllib.linalg.Vector, org.apache.spark.mllib.linalg.Vector>() {
+
+			public org.apache.spark.mllib.linalg.Vector call(
+					org.apache.spark.mllib.linalg.Vector yi) throws Exception {
+				
+				ArrayList<Tuple2<Integer, Double>> tupleList = new  ArrayList<Tuple2<Integer, Double>>();
+				int i, index;
+				double v, span;
+				int[] indices =  ((SparseVector)yi).indices();
+				for(i=0; i < indices.length ; i++) {
+		             index = indices[i];
+		             v = yi.apply(index);
+		             span = br_span_mahout.value().getQuick(index);
+		             Tuple2<Integer,Double> tuple = new Tuple2<Integer,Double>(index, v/span);
+                     tupleList.add(tuple);
+				}
+				org.apache.spark.mllib.linalg.Vector sparkVector = Vectors.sparse(nCols,tupleList);
+                return sparkVector;
+			}
+	  });//End Normalize Job
+	  
+      //3. Frobenious Norm Job : Obtain Frobenius norm of the input RDD<org.apache.spark.mllib.linalg.Vector>
       /**
        * To compute the norm2 of a sparse matrix, iterate over sparse items and sum
        * square of the difference. After processing each row, add the sum of the
@@ -318,7 +355,7 @@ public class SparkPCA implements Serializable {
 		    final Broadcast<Vector> br_xm_mahout = sc.broadcast(xm_mahout);
 		    // We skip computing X as we generate it on demand using Y and Y2X
 		    
-			// 3. X'X and Y'X Job:  The job computes the two matrices X'X and Y'X
+			// 4. X'X and Y'X Job:  The job computes the two matrices X'X and Y'X
 		    /**
 		     * Xc = Yc * MEM	(MEM is the in-memory broadcasted matrix Y2X)
 		     * 
@@ -442,7 +479,7 @@ public class SparkPCA implements Serializable {
 		   // Compute new value for ss
 		   // ss = ( sum(sum(Ye.^2)) + trace(XtX*CtC) - 2sum(XiCtYit))/(N*D);
 		   
-		   //4. Variance Job: Computes part of variance that requires a distributed job
+		   //5. Variance Job: Computes part of variance that requires a distributed job
 		   /**
 		    * xcty = Sum (xi * C' * yi')
 		    * 
@@ -495,7 +532,7 @@ public class SparkPCA implements Serializable {
 		          PCAUtils.vectorTimesMatrixTranspose(xm_mahout, centralC, resArrayZmTmp);
 		          final double[] resArrayZm= PCAUtils.subtractVectorArray(resArrayZmTmp , meanVector);
 		          
-		          //5. Reconstruction Error Job: The job computes the reconstruction error of the input matrix after updating the principal 
+		          //6. Reconstruction Error Job: The job computes the reconstruction error of the input matrix after updating the principal 
 		          //components matrix
 		          /**
 		           * Xc = Yc * Y2X
