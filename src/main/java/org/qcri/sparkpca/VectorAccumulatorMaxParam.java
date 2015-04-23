@@ -36,6 +36,8 @@ public class VectorAccumulatorMaxParam implements AccumulatorParam<double[]> {
 		return arg0;
 	}
 	public double[] zero(double[] arg0) {
+		for(int i=0; i< arg0.length; i++)
+			arg0[i]=Double.MIN_VALUE;
 		return arg0;
 	}
 
