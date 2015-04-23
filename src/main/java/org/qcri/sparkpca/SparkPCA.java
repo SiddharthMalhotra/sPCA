@@ -16,6 +16,7 @@ package org.qcri.sparkpca;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Iterator;
 
 import org.apache.hadoop.io.IntWritable;
@@ -216,7 +217,9 @@ public class SparkPCA implements Serializable {
 	    final Accumulator<double[]> vectorAccumMin = sc.accumulator(new double[nCols], new VectorAccumulatorMinParam());
 	    final double[] internalSumY=new double[nCols];
 	    final double[] internalMaxY=new double[nCols];
+	    Arrays.fill(internalMaxY, Double.NEGATIVE_INFINITY);
 	    final double[] internalMinY=new double[nCols];
+	    Arrays.fill(internalMinY, Double.POSITIVE_INFINITY);
 	    vectors.foreachPartition(new VoidFunction<Iterator<org.apache.spark.mllib.linalg.Vector>>() {
 
 	        public void call(Iterator<org.apache.spark.mllib.linalg.Vector> arg0)
