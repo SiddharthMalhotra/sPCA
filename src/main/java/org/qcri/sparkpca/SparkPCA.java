@@ -270,6 +270,8 @@ public class SparkPCA implements Serializable {
 		             index = indices[i];
 		             v = yi.apply(index);
 		             span = br_span_mahout.value().getQuick(index);
+		             if(span==0 || span==Double.POSITIVE_INFINITY || span==Double.NEGATIVE_INFINITY)
+		            	 span=1;
 		             Tuple2<Integer,Double> tuple = new Tuple2<Integer,Double>(index, v/span);
                      tupleList.add(tuple);
 				}
