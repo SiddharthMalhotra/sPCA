@@ -239,7 +239,7 @@ public class SparkPCA implements Serializable {
 	    		{
 	    			yi=arg0.next();
 	    			indices=((SparseVector)yi).indices();
-	    			int prevIndex=-1;
+	    			int prevIndex=0;
 	    			if(normalize==1)
 	    				Arrays.sort(indices);
 	    			for(i=0; i< indices.length; i++)
@@ -252,9 +252,7 @@ public class SparkPCA implements Serializable {
 	    						internalMaxY[indices[i]]=value;
 	    					if(value < internalMinY[indices[i]])
 	    						internalMinY[indices[i]]=value;
-	    					if(prevIndex==-1)
-	    						continue;
-	    					for(int j=prevIndex+1;j<indices[i]-1; j++)
+	    					for(int j=prevIndex+1;j<=indices[i]-1; j++)
 	    					{
 	    						if(internalMaxY[j] < 0)
 	    							internalMaxY[j]=0;
@@ -264,6 +262,16 @@ public class SparkPCA implements Serializable {
 	    					prevIndex=indices[i];
 	    				}
     			    }
+	    			if(normalize==1) 
+	    			{
+	    				for(int j=prevIndex+1;j<nCols; j++) //from the last non-zero index to the last index in the array
+    					{
+    						if(internalMaxY[j] < 0)
+    							internalMaxY[j]=0;
+    						if(internalMinY[j] > 0)
+    							internalMinY[j]=0;
+    					}
+	    			}
 	    		}
 	    		vectorAccumSum.add(internalSumY);
 	    		if(normalize==1)
