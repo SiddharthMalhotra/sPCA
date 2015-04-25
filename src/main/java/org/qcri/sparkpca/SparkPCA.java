@@ -64,7 +64,7 @@ public class SparkPCA implements Serializable {
      public static void main(String[] args) {
     	 if(args.length < 5)
 		 {
-			 System.out.println("Usage: <path/to/input/matrix> <path/to/outputfile> <number of rows> <number of columns> <number of principal components> [Error sampling rate] [max iterations]");
+			 System.out.println("Usage: <path/to/input/matrix> <path/to/outputfile> <number of rows> <number of columns> <number of principal components> [Normalize] [Error sampling rate] [max iterations]");
 			 return;
 		 }
     	 //Parsing input arguments
@@ -73,10 +73,17 @@ public class SparkPCA implements Serializable {
 	     final int nRows = Integer.parseInt(args[2]);
 	     final int nCols = Integer.parseInt(args[3]);
 	     final int nPCs   = Integer.parseInt(args[4]);
+	     int normalize=0; // do not normalize
 	     double errRate=1;
 	     int maxIterations=3;
 	     try {
-	    	 errRate= Float.parseFloat(args[5]);
+	    	 normalize=Integer.parseInt(args[5]);
+	     }
+	     catch(Exception e) {
+	    	 log.warn("Normalize="+ normalize + ". Matrix will not be normalized before PCA");
+	     }
+	     try {
+	    	 errRate= Float.parseFloat(args[6]);
 	     }
 	     catch(Exception e) {
 	    	
@@ -88,11 +95,12 @@ public class SparkPCA implements Serializable {
 	    	 log.warn("error sampling rate set to:  errRate=" + errRate);
 	     }
 	     try {
-	    	 maxIterations=Integer.parseInt(args[6]);
+	    	 maxIterations=Integer.parseInt(args[7]);
 	     }
 	     catch(Exception e) {
 	    	 log.warn("maximum iterations is set to default: maxIterations=" + maxIterations);
 	     }
+	   
 	     
 	     //Setting Spark configuration parameters
 	     SparkConf conf = new SparkConf().setAppName("SparkPCA");
@@ -100,7 +108,7 @@ public class SparkPCA implements Serializable {
 	     JavaSparkContext sc = new JavaSparkContext(conf);
 	     
 	     //compute principal components
-	     org.apache.spark.mllib.linalg.Matrix principalComponentsMatrix = computePrincipalComponents(sc, inputPath, nRows, nCols, nPCs, errRate, maxIterations);
+	     org.apache.spark.mllib.linalg.Matrix principalComponentsMatrix = computePrincipalComponents(sc, inputPath, nRows, nCols, nPCs, normalize, errRate, maxIterations);
 	     
 	     //save principal components
 	     PCAUtils.printMatrixToFile(principalComponentsMatrix, outputPath);
@@ -127,9 +135,9 @@ public class SparkPCA implements Serializable {
       * 			Maximum number of iterations before terminating
       * @return Matrix of size nCols X nPCs having the desired principal components
       */
-     public static org.apache.spark.mllib.linalg.Matrix computePrincipalComponents(JavaSparkContext sc, RowMatrix inputMatrix, final int nRows, final int nCols, final int nPCs, final double errRate, final int maxIterations) {
+     public static org.apache.spark.mllib.linalg.Matrix computePrincipalComponents(JavaSparkContext sc, RowMatrix inputMatrix, final int nRows, final int nCols, final int nPCs, final int normalize, final double errRate, final int maxIterations) {
     	  JavaRDD<org.apache.spark.mllib.linalg.Vector> vectors = inputMatrix.rows().toJavaRDD().cache();
-    	  return computePrincipalComponents(sc, vectors, nRows, nCols, nPCs, errRate, maxIterations);
+    	  return computePrincipalComponents(sc, vectors, nRows, nCols, nPCs, normalize, errRate, maxIterations);
      }
     
      /**
@@ -151,7 +159,7 @@ public class SparkPCA implements Serializable {
       * 			Maximum number of iterations before terminating
       * @return Matrix of size nCols X nPCs having the desired principal components
       */
-     public static org.apache.spark.mllib.linalg.Matrix computePrincipalComponents(JavaSparkContext sc, String inputPath, final int nRows, final int nCols, final int nPCs, final double errRate, final int maxIterations) {
+     public static org.apache.spark.mllib.linalg.Matrix computePrincipalComponents(JavaSparkContext sc, String inputPath, final int nRows, final int nCols, final int nPCs, final int normalize, final double errRate, final int maxIterations) {
  	     
 	    
 	    //Read from sequence file
@@ -179,7 +187,7 @@ public class SparkPCA implements Serializable {
 	              }
 	    }).cache();
 	    
-	    return computePrincipalComponents(sc, vectors, nRows, nCols, nPCs, errRate, maxIterations);
+	    return computePrincipalComponents(sc, vectors, nRows, nCols, nPCs, normalize, errRate, maxIterations);
      }
      /**
       * Compute principal component analysis where the input is an RDD<org.apache.spark.mllib.linalg.Vector> of vectors such that each vector represents a row in the matrix
@@ -200,7 +208,7 @@ public class SparkPCA implements Serializable {
       * 			Maximum number of iterations before terminating
       * @return Matrix of size nCols X nPCs having the desired principal components
       */
-	 public static org.apache.spark.mllib.linalg.Matrix computePrincipalComponents(JavaSparkContext sc, JavaRDD<org.apache.spark.mllib.linalg.Vector> vectors, final int nRows, final int nCols, final int nPCs, final double errRate, final int maxIterations) {
+	 public static org.apache.spark.mllib.linalg.Matrix computePrincipalComponents(JavaSparkContext sc, JavaRDD<org.apache.spark.mllib.linalg.Vector> vectors, final int nRows, final int nCols, final int nPCs, final int normalize, final double errRate, final int maxIterations) {
 		 	     
 	    System.out.println("Rows: " + nRows + ", Columns " + nCols);
 	    double ss;
@@ -231,19 +239,38 @@ public class SparkPCA implements Serializable {
 	    		{
 	    			yi=arg0.next();
 	    			indices=((SparseVector)yi).indices();
+	    			int prevIndex=-1;
+	    			if(normalize==1)
+	    				Arrays.sort(indices);
 	    			for(i=0; i< indices.length; i++)
     			    {
 	    				double value=yi.apply(indices[i]);
 	    				internalSumY[indices[i]]+=value;
-	    				if(value > internalMaxY[indices[i]])
-	    					internalMaxY[indices[i]]=value;
-	    				if(value < internalMinY[indices[i]])
-	    					internalMinY[indices[i]]=value;
-    			    }	                
+	    				if(normalize==1)
+	    				{
+	    					if(value > internalMaxY[indices[i]])
+	    						internalMaxY[indices[i]]=value;
+	    					if(value < internalMinY[indices[i]])
+	    						internalMinY[indices[i]]=value;
+	    					if(prevIndex==-1)
+	    						continue;
+	    					for(int j=prevIndex+1;j<indices[i]-1; j++)
+	    					{
+	    						if(internalMaxY[j] < 0)
+	    							internalMaxY[j]=0;
+	    						if(internalMinY[j] > 0)
+	    							internalMinY[j]=0;
+	    					}
+	    					prevIndex=indices[i];
+	    				}
+    			    }
 	    		}
 	    		vectorAccumSum.add(internalSumY);
-	    		vectorAccumMax.add(internalMaxY);
-	    		vectorAccumMin.add(internalMinY);
+	    		if(normalize==1)
+	    		{
+	    			vectorAccumMax.add(internalMaxY);
+	    			vectorAccumMin.add(internalMinY);
+	    		}
 	        }
 
 	  });//End Mean Job
@@ -253,32 +280,35 @@ public class SparkPCA implements Serializable {
 	  final Broadcast<Vector> br_ym_mahout = sc.broadcast(meanVector);
 	  
 	  //Get the span vector by subtracting the min value from the max value of each column
-	  final Vector spanVector=new DenseVector(vectorAccumMax.value()).minus(new DenseVector(vectorAccumMin.value()));
-	  final Broadcast<Vector> br_span_mahout = sc.broadcast(spanVector);
-      
-	  //2. Normalize Job : Normalize a matrix by dividing each value to the span of its column. After normalization, the difference between the values in a column is <=1
-	  vectors=vectors.map(new Function<org.apache.spark.mllib.linalg.Vector, org.apache.spark.mllib.linalg.Vector>() {
-
-			public org.apache.spark.mllib.linalg.Vector call(
-					org.apache.spark.mllib.linalg.Vector yi) throws Exception {
-				
-				ArrayList<Tuple2<Integer, Double>> tupleList = new  ArrayList<Tuple2<Integer, Double>>();
-				int i, index;
-				double v, span;
-				int[] indices =  ((SparseVector)yi).indices();
-				for(i=0; i < indices.length ; i++) {
-		             index = indices[i];
-		             v = yi.apply(index);
-		             span = br_span_mahout.value().getQuick(index);
-		             if(span==0 || span==Double.POSITIVE_INFINITY || span==Double.NEGATIVE_INFINITY)
-		            	 span=1;
-		             Tuple2<Integer,Double> tuple = new Tuple2<Integer,Double>(index, v/span);
-                     tupleList.add(tuple);
+	  if(normalize==1)
+	  {
+		  final Vector spanVector=new DenseVector(vectorAccumMax.value()).minus(new DenseVector(vectorAccumMin.value()));
+		  final Broadcast<Vector> br_span_mahout = sc.broadcast(spanVector);
+	      
+		  //2. Normalize Job : Normalize a matrix by dividing each value to the span of its column. After normalization, the difference between the values in a column is <=1
+		  vectors=vectors.map(new Function<org.apache.spark.mllib.linalg.Vector, org.apache.spark.mllib.linalg.Vector>() {
+	
+				public org.apache.spark.mllib.linalg.Vector call(
+						org.apache.spark.mllib.linalg.Vector yi) throws Exception {
+					
+					ArrayList<Tuple2<Integer, Double>> tupleList = new  ArrayList<Tuple2<Integer, Double>>();
+					int i, index;
+					double v, span;
+					int[] indices =  ((SparseVector)yi).indices();
+					for(i=0; i < indices.length ; i++) {
+			             index = indices[i];
+			             v = yi.apply(index);
+			             span = br_span_mahout.value().getQuick(index);
+			             if(span==0 || span==Double.POSITIVE_INFINITY || span==Double.NEGATIVE_INFINITY)
+			            	 span=1;
+			             Tuple2<Integer,Double> tuple = new Tuple2<Integer,Double>(index, v/span);
+	                     tupleList.add(tuple);
+					}
+					org.apache.spark.mllib.linalg.Vector sparkVector = Vectors.sparse(nCols,tupleList);
+	                return sparkVector;
 				}
-				org.apache.spark.mllib.linalg.Vector sparkVector = Vectors.sparse(nCols,tupleList);
-                return sparkVector;
-			}
-	  });//End Normalize Job
+		  });//End Normalize Job
+	  }
 	  
       //3. Frobenious Norm Job : Obtain Frobenius norm of the input RDD<org.apache.spark.mllib.linalg.Vector>
       /**
