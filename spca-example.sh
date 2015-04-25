@@ -23,4 +23,4 @@
 SCRIPT=$(readlink -f $0)
 # Absolute path this script is in. /home/user/bin
 SCRIPTPATH=`dirname $SCRIPT`
-$SPARK_HOME/bin/spark-submit --class org.qcri.sparkpca.SparkPCA --master local $SCRIPTPATH/target/sparkPCA-1.0.jar $SCRIPTPATH/input/seqfiles $SCRIPTPATH/output.txt 7 5 3 1 3
+$SPARK_HOME/bin/spark-submit --class org.qcri.sparkpca.SparkPCA --master local $SCRIPTPATH/target/sparkPCA-1.0.jar $SCRIPTPATH/input/seqfiles $SCRIPTPATH/output.txt 7 5 3 1 1 3
