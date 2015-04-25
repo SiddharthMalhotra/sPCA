@@ -239,7 +239,7 @@ public class SparkPCA implements Serializable {
 	    		{
 	    			yi=arg0.next();
 	    			indices=((SparseVector)yi).indices();
-	    			int prevIndex=0;
+	    			int prevIndex=-1;
 	    			if(normalize==1)
 	    				Arrays.sort(indices);
 	    			for(i=0; i< indices.length; i++)
