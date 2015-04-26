@@ -17,7 +17,9 @@ package org.qcri.sparkpca;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Map;
 
 import org.apache.hadoop.io.IntWritable;
 import org.apache.mahout.math.DenseMatrix;
@@ -228,20 +230,18 @@ public class SparkPCA implements Serializable {
 	    Arrays.fill(internalMaxY, Double.NEGATIVE_INFINITY);
 	    final double[] internalMinY=new double[nCols];
 	    Arrays.fill(internalMinY, Double.POSITIVE_INFINITY);
+	    final Map<Integer, Integer> indices_count= new HashMap<Integer, Integer>(); 
 	    vectors.foreachPartition(new VoidFunction<Iterator<org.apache.spark.mllib.linalg.Vector>>() {
 
 	        public void call(Iterator<org.apache.spark.mllib.linalg.Vector> arg0)
 	                        throws Exception {
 	        	org.apache.spark.mllib.linalg.Vector yi;
 	        	int[] indices=null;
-	        	int i;
+	        	int i, count;
 	    		while(arg0.hasNext())
 	    		{
 	    			yi=arg0.next();
 	    			indices=((SparseVector)yi).indices();
-	    			int prevIndex=-1;
-	    			if(normalize==1)
-	    				Arrays.sort(indices);
 	    			for(i=0; i< indices.length; i++)
     			    {
 	    				double value=yi.apply(indices[i]);
@@ -252,26 +252,17 @@ public class SparkPCA implements Serializable {
 	    						internalMaxY[indices[i]]=value;
 	    					if(value < internalMinY[indices[i]])
 	    						internalMinY[indices[i]]=value;
-	    					for(int j=prevIndex+1;j<=indices[i]-1; j++)
+	    					try
 	    					{
-	    						if(internalMaxY[j] < 0)
-	    							internalMaxY[j]=0;
-	    						if(internalMinY[j] > 0)
-	    							internalMinY[j]=0;
+	    						count = indices_count.get(indices[i]); 
+	    						count++;
 	    					}
-	    					prevIndex=indices[i];
+	    					catch(Exception e)
+	    					{
+	    						indices_count.put(indices[i], 1);
+	    					}
 	    				}
     			    }
-	    			if(normalize==1) 
-	    			{
-	    				for(int j=prevIndex+1;j<nCols; j++) //from the last non-zero index to the last index in the array
-    					{
-    						if(internalMaxY[j] < 0)
-    							internalMaxY[j]=0;
-    						if(internalMinY[j] > 0)
-    							internalMinY[j]=0;
-    					}
-	    			}
 	    		}
 	    		vectorAccumSum.add(internalSumY);
 	    		if(normalize==1)
@@ -287,10 +278,31 @@ public class SparkPCA implements Serializable {
 	  final Vector meanVector=new DenseVector(vectorAccumSum.value()).divide(nRows);  
 	  final Broadcast<Vector> br_ym_mahout = sc.broadcast(meanVector);
 	  
-	  //Get the span vector by subtracting the min value from the max value of each column
+	  //Update the min and max vector, the upper job did not loop on zero elements
+	  double[] maxVector=vectorAccumMax.value();
+	  double[] minVector=vectorAccumMin.value();
 	  if(normalize==1)
 	  {
-		  final Vector spanVector=new DenseVector(vectorAccumMax.value()).minus(new DenseVector(vectorAccumMin.value()));
+		  for (int i=0; i<nCols; i++)
+		  {
+			  try
+			  {
+				  if(indices_count.get(i)<nRows)
+				  {
+						if(maxVector[i] < 0)
+							maxVector[i]=0;
+						if(minVector[i] > 0)
+							minVector[i]=0; 
+				  }
+			  }
+			  catch (Exception e)
+			  {
+				  maxVector[i]=0;
+				  minVector[i]=0;
+			  }
+		  }
+		  //Get the span vector by subtracting the min value from the max value of each column
+		  final Vector spanVector=new DenseVector(maxVector).minus(new DenseVector(minVector));
 		  final Broadcast<Vector> br_span_mahout = sc.broadcast(spanVector);
 	      
 		  //2. Normalize Job : Normalize a matrix by dividing each value to the span of its column. After normalization, the difference between the values in a column is <=1
@@ -530,7 +542,7 @@ public class SparkPCA implements Serializable {
 		    * 
 		    * xi = yi * y2x
 		    * 
-		    * To make it efficient for uncentralized sparse inputs, we receive the mean
+		    * To make it efficient for sparse matrices that are not mean-centered, we receive the mean
 		    * separately:
 		    * 
 		    * xi = (yi - ym) * y2x = yi * y2x - xm, where xm = ym*y2x
