@@ -19,7 +19,7 @@
 #       [<Error sampling rate>](optional): The error sampling rate [0-1] that is used for computing the error, It can be set to 0.01 to compute the error for only a small sample of the matrix, this speeds up the computations significantly)
 #       [<max iterations>] (optional): Maximum number of iterations before terminating, the default is 3
 
-if [  $# -le 1 ] 
+if [  $# -lt 1 ] 
 	then 
 		echo -e "\nUsage:\n$0 <master_url> \n" 
 		exit 1
@@ -28,4 +28,4 @@ if [  $# -le 1 ]
 master_url=$1  #master url has two options (local, spark://<IP>:7077) 
 SCRIPT=$(readlink -f $0) # Absolute path to this script.
 SCRIPTPATH=`dirname $SCRIPT` # Absolute path this script is in. /home/user/bin
-$SPARK_HOME/bin/spark-submit --class org.qcri.sparkpca.SparkPCA --master $master_url $SCRIPTPATH/target/sparkPCA-1.0.jar -DInput=$SCRIPTPATH/input/seqfiles -DOutput=$SCRIPTPATH/output.txt -DRows=7 -DCols=5 -DErr=1 -DMaxIter=3
+$SPARK_HOME/bin/spark-submit --class org.qcri.sparkpca.SparkPCA --master $master_url --driver-java-options "-DInput=$SCRIPTPATH/input/seqfiles -DOutput=$SCRIPTPATH/output.txt -DRows=7 -DCols=5 -DPCs=3 -DErr=1 -DMaxIter=3" $SCRIPTPATH/target/sparkPCA-1.0.jar 
