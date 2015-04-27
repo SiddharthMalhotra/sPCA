@@ -14,6 +14,7 @@
 
 package org.qcri.sparkpca;
 
+import java.io.File;
 import java.io.FileWriter;
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -510,7 +511,7 @@ class PCAUtils {
 	 * Writes the matrix to file based on the given format format
 	 */
 	public static void printMatrixToFile(org.apache.spark.mllib.linalg.Matrix m, OutputFormat format, String outputPath) {
-		String outputFilePath=outputPath+"PCs.txt";
+		String outputFilePath=outputPath+ File.separator + "PCs.txt";
 		switch(format)
 		{
 			case DENSE:
