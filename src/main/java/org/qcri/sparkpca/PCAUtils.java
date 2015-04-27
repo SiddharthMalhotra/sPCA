@@ -529,16 +529,25 @@ class PCAUtils {
 	/**
 	 * Writes the matrix in a Dense text format
 	 */
+	
 	public static void printMatrixInDenseTextFormat(org.apache.spark.mllib.linalg.Matrix m, String outputPath) {
-		try
-		{
+		try {
 			FileWriter fileWriter = new FileWriter(outputPath);
 			PrintWriter printWriter= new PrintWriter(fileWriter);
-			printWriter.println(m);
+			 for(int i=0; i < m.numRows(); i++)
+			 {
+				for(int j=0; j < m.numCols(); j++)
+				{
+					printWriter.print(m.apply(i, j) + " ");
+				}
+				printWriter.println();
+			}
+			printWriter.close();
+			fileWriter.close();
 		}
 		catch (Exception e) {
 			Log.error("Output file " + outputPath + " not found ");
-		}
+		}	
 	}
 	
 	/**
