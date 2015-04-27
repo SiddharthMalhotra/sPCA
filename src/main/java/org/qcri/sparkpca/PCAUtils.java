@@ -569,11 +569,11 @@ class PCAUtils {
 					if(val!=0)
 						if(firstValue)
 						{
-							printWriter.println(j + ":" + val);
+							printWriter.print(j + ":" + val);
 						    firstValue=false;
 						}
 						else
-							printWriter.println("," + j + ":" + val);
+							printWriter.print("," + j + ":" + val);
 				}
 				printWriter.print("}");
 				printWriter.println();
