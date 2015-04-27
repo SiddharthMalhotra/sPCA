@@ -16,6 +16,7 @@ package org.qcri.sparkpca;
 
 import java.io.FileWriter;
 import java.io.PrintWriter;
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Random;
 
@@ -27,8 +28,15 @@ import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.function.DoubleFunction;
 import org.apache.spark.mllib.linalg.Matrices;
 import org.apache.spark.mllib.linalg.SparseVector;
+import org.apache.spark.mllib.linalg.Vectors;
+import org.qcri.sparkpca.FileFormat.OutputFormat;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import scala.Tuple2;
 
 import com.esotericsoftware.minlog.Log;
+
 
 /**
  * This class includes the utility functions that is used by PCA algorithm
@@ -37,6 +45,7 @@ import com.esotericsoftware.minlog.Log;
  * @author Tarek Elgamal
  */
 class PCAUtils {
+	 private final static Logger log = LoggerFactory.getLogger(SparkPCA.class);
 	
 	/**
 	 * We use a single random object to help reproducing the erroneous scenarios
@@ -400,6 +409,31 @@ class PCAUtils {
 			resArray[col] = dotRes;
 		}
 	}
+	static org.apache.spark.mllib.linalg.Vector sparseVectorTimesMatrix(org.apache.spark.mllib.linalg.Vector sparseVector, Matrix matrix) {
+		int matrixCols = matrix.numCols();
+		int[] indices;
+		ArrayList<Tuple2<Integer, Double>> tupleList = new  ArrayList<Tuple2<Integer, Double>>();
+		for (int col = 0; col < matrixCols; col++) 
+		{
+			indices=((SparseVector)sparseVector).indices();
+			int index = 0, i=0;
+			double value = 0;
+			double dotRes = 0;
+			for(i=0; i <indices.length; i++)
+			{
+				index=indices[i];
+				value=sparseVector.apply(index);
+				dotRes += matrix.getQuick(index,col) * value;
+			}
+			if(dotRes !=0)
+			{
+				Tuple2<Integer,Double> tuple = new Tuple2<Integer,Double>(col,dotRes);
+				tupleList.add(tuple);
+			}
+		}
+		org.apache.spark.mllib.linalg.Vector sparkVector = Vectors.sparse(matrixCols,tupleList);
+        return sparkVector;
+	}
 	
 	/**
 	 * Compute the inverse of a Matrix
@@ -470,20 +504,70 @@ class PCAUtils {
 		org.apache.spark.mllib.linalg.Matrix sparkMatrix = Matrices.dense(rows, cols, colMajorArray);
 		return sparkMatrix;
 	}
+	
+	
 	/**
-	 * Writes the matrix in a text file format
+	 * Writes the matrix to file based on the given format format
 	 */
-	public static void printMatrixToFile(org.apache.spark.mllib.linalg.Matrix m, String outputPath) {
-		try {
+	public static void printMatrixToFile(org.apache.spark.mllib.linalg.Matrix m, OutputFormat format, String outputPath) {
+		String outputFilePath=outputPath+"PCs.txt";
+		switch(format)
+		{
+			case DENSE:
+				printMatrixInDenseTextFormat(m,outputFilePath);
+				break;
+			case LIL:
+				printMatrixInListOfListsFormat(m,outputFilePath);
+				break;
+			case COO:
+				printMatrixInCoordinateFormat(m,outputFilePath);
+				break;	
+		}
+	}
+	
+	/**
+	 * Writes the matrix in a Dense text format
+	 */
+	public static void printMatrixInDenseTextFormat(org.apache.spark.mllib.linalg.Matrix m, String outputPath) {
+		try
+		{
 			FileWriter fileWriter = new FileWriter(outputPath);
 			PrintWriter printWriter= new PrintWriter(fileWriter);
-			 for(int i=0; i < m.numRows(); i++)
-			 {
+			printWriter.println(m);
+		}
+		catch (Exception e) {
+			Log.error("Output file " + outputPath + " not found ");
+		}
+	}
+	
+	/**
+	 * Writes the matrix in a List of lists (LIL) format
+	 */
+	public static void printMatrixInListOfListsFormat(org.apache.spark.mllib.linalg.Matrix m, String outputPath) {
+		try
+		{
+			FileWriter fileWriter = new FileWriter(outputPath);
+			PrintWriter printWriter= new PrintWriter(fileWriter);
+			boolean firstValue=true;
+			double val;
+			for(int i=0; i < m.numRows(); i++)
+			{
+				printWriter.print("{");
 				for(int j=0; j < m.numCols(); j++)
 				{
-					printWriter.print(m.apply(i, j) + " ");
+					val=m.apply(i, j);
+					if(val!=0)
+						if(firstValue)
+						{
+							printWriter.println(j + ":" + val);
+						    firstValue=false;
+						}
+						else
+							printWriter.println("," + j + ":" + val);
 				}
+				printWriter.print("}");
 				printWriter.println();
+				firstValue=true;
 			}
 			printWriter.close();
 			fileWriter.close();
@@ -491,7 +575,32 @@ class PCAUtils {
 		catch (Exception e) {
 			Log.error("Output file " + outputPath + " not found ");
 		}
-		
+	}
+	
+	/**
+	 * Writes the matrix in a Coordinate list (COO) format
+	 */
+	public static void printMatrixInCoordinateFormat(org.apache.spark.mllib.linalg.Matrix m, String outputPath) {
+		try
+		{
+			FileWriter fileWriter = new FileWriter(outputPath);
+			PrintWriter printWriter= new PrintWriter(fileWriter);
+			double val;
+			for(int i=0; i < m.numRows(); i++)
+			 {
+				for(int j=0; j < m.numCols(); j++)
+				{
+					val=m.apply(i, j);
+					if(val!=0)
+						printWriter.println(i + "," + j + "," + val);
+				}
+			}
+			printWriter.close();
+			fileWriter.close();
+		}
+		catch (Exception e) {
+			Log.error("Output file " + outputPath + " not found ");
+		}
 	}
 	
 }

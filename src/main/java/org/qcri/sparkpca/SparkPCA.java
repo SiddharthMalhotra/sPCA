@@ -14,6 +14,7 @@
 
 package org.qcri.sparkpca;
 
+import java.io.File;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -43,6 +44,7 @@ import org.apache.spark.mllib.linalg.Vectors;
 import org.apache.spark.mllib.linalg.distributed.RowMatrix;
 import org.apache.spark.storage.StorageLevel;
 import org.apache.spark.ui.storage.StoragePage;
+import org.qcri.sparkpca.FileFormat.OutputFormat;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import java.lang.instrument.Instrumentation;
@@ -67,21 +69,61 @@ public class SparkPCA implements Serializable {
      private final static boolean CALCULATE_ERR_ATTHEEND = false;
 
      public static void main(String[] args) {
-    	 if(args.length < 5)
-		 {
-			 System.out.println("Usage: <path/to/input/matrix> <path/to/outputfile> <number of rows> <number of columns> <number of principal components> [Error sampling rate] [max iterations]");
-			 return;
-		 }
-    	 //Parsing input arguments
-		 String inputPath = args[0];
-	     String outputPath = args[1];
-	     final int nRows = Integer.parseInt(args[2]);
-	     final int nCols = Integer.parseInt(args[3]);
-	     final int nPCs   = Integer.parseInt(args[4]);
-	     double errRate=1;
-	     int maxIterations=3;
+    	 
+    	
+	    //Parsing input arguments
+		final String inputPath;
+		final String outputPath;
+		final int nRows;
+		final int nCols;
+		final int nPCs;
+		
+		try {
+			inputPath=System.getProperty("Input");
+		}
+		catch(Exception e) {
+			printLogMessage("Input");
+			return;
+		}
+		try {
+			outputPath=System.getProperty("Output");
+		}
+		catch(Exception e) {
+			printLogMessage("Output");
+			return;
+		}
+		
+		try {
+			nRows=Integer.parseInt(System.getProperty("Rows"));
+		}
+		catch(Exception e) {
+			printLogMessage("Rows");
+			return;
+		}
+		
+		try {
+			nCols=Integer.parseInt(System.getProperty("Cols"));
+		}
+		catch(Exception e) {
+			printLogMessage("Cols");
+			return;
+		}
+		try {
+			nPCs=Integer.parseInt(System.getProperty("PCs"));
+		}
+		catch(Exception e) {
+			printLogMessage("PCs");
+			return;
+		}
+		/**
+		 * Defaults for optional arguments
+		 */
+		 double errRate=1;
+		 int maxIterations=3;
+		 OutputFormat outputFileFormat=OutputFormat.DENSE;
+		 int computeProjectedMatrix=0;
 	     try {
-	    	 errRate= Float.parseFloat(args[5]);
+	    	 errRate= Float.parseFloat(System.getProperty("Err"));
 	     }
 	     catch(Exception e) {
 	    	
@@ -93,11 +135,30 @@ public class SparkPCA implements Serializable {
 	    	 log.warn("error sampling rate set to:  errRate=" + errRate);
 	     }
 	     try {
-	    	 maxIterations=Integer.parseInt(args[6]);
+	    	 maxIterations=Integer.parseInt(System.getProperty("MaxIter"));
 	     }
 	     catch(Exception e) {
-	    	 log.warn("maximum iterations is set to default: maxIterations=" + maxIterations);
+	    	 log.warn("maximum iterations is set to default: maximum Iterations=" + maxIterations);
 	     }
+	     
+	     try {
+	    	 outputFileFormat=OutputFormat.valueOf(System.getProperty("OutFmt"));
+	     }
+	     catch(IllegalArgumentException e) {
+	    	 log.warn("Invalid Format " + System.getProperty("OutFmt") +  ", Default output format"  + outputFileFormat + " will be used ");
+	     }
+	     catch(Exception e) {
+	    	 log.warn("Default output format "  + outputFileFormat + " will be used ");
+	     }
+	     
+	     try {
+	    	 computeProjectedMatrix=Integer.parseInt(System.getProperty("ComputeProjectedMatrix"));
+	     }
+	     catch(Exception e) {
+	    	 log.warn("Projected Matrix will not be computed, the output path will contain the principal components only");
+	     }
+	     
+	     
 	     
 	     //Setting Spark configuration parameters
 	     SparkConf conf = new SparkConf().setAppName("SparkPCA");
@@ -105,10 +166,10 @@ public class SparkPCA implements Serializable {
 	     JavaSparkContext sc = new JavaSparkContext(conf);
 	     
 	     //compute principal components
-	     org.apache.spark.mllib.linalg.Matrix principalComponentsMatrix = computePrincipalComponents(sc, inputPath, nRows, nCols, nPCs, errRate, maxIterations);
+	     org.apache.spark.mllib.linalg.Matrix principalComponentsMatrix = computePrincipalComponents(sc, inputPath, outputPath, nRows, nCols, nPCs, errRate, maxIterations, computeProjectedMatrix);
 	     
 	     //save principal components
-	     PCAUtils.printMatrixToFile(principalComponentsMatrix, outputPath);
+	     PCAUtils.printMatrixToFile(principalComponentsMatrix, outputFileFormat, outputPath);
 	     
 	     log.info("Principal components computed successfully ");
 	 }
@@ -132,9 +193,9 @@ public class SparkPCA implements Serializable {
       * 			Maximum number of iterations before terminating
       * @return Matrix of size nCols X nPCs having the desired principal components
       */
-     public static org.apache.spark.mllib.linalg.Matrix computePrincipalComponents(JavaSparkContext sc, RowMatrix inputMatrix, final int nRows, final int nCols, final int nPCs, final double errRate, final int maxIterations) {
+     public static org.apache.spark.mllib.linalg.Matrix computePrincipalComponents(JavaSparkContext sc, RowMatrix inputMatrix, String outputPath, final int nRows, final int nCols, final int nPCs, final double errRate, final int maxIterations, final int computeProjectedMatrix) {
     	  JavaRDD<org.apache.spark.mllib.linalg.Vector> vectors = inputMatrix.rows().toJavaRDD().cache();
-    	  return computePrincipalComponents(sc, vectors, nRows, nCols, nPCs, errRate, maxIterations);
+    	  return computePrincipalComponents(sc, vectors, outputPath, nRows, nCols, nPCs, errRate, maxIterations, computeProjectedMatrix);
      }
     
      /**
@@ -156,7 +217,7 @@ public class SparkPCA implements Serializable {
       * 			Maximum number of iterations before terminating
       * @return Matrix of size nCols X nPCs having the desired principal components
       */
-     public static org.apache.spark.mllib.linalg.Matrix computePrincipalComponents(JavaSparkContext sc, String inputPath, final int nRows, final int nCols, final int nPCs, final double errRate, final int maxIterations) {
+     public static org.apache.spark.mllib.linalg.Matrix computePrincipalComponents(JavaSparkContext sc, String inputPath, String outputPath, final int nRows, final int nCols, final int nPCs, final double errRate, final int maxIterations, final int computeProjectedMatrix) {
  	     
 	    
 	    //Read from sequence file
@@ -185,7 +246,7 @@ public class SparkPCA implements Serializable {
 	              }
 	    }).persist(StorageLevel.MEMORY_ONLY_SER());
 	    
-	    return computePrincipalComponents(sc, vectors, nRows, nCols, nPCs, errRate, maxIterations);
+	    return computePrincipalComponents(sc, vectors, outputPath, nRows, nCols, nPCs, errRate, maxIterations, computeProjectedMatrix);
      }
      /**
       * Compute principal component analysis where the input is an RDD<org.apache.spark.mllib.linalg.Vector> of vectors such that each vector represents a row in the matrix
@@ -206,7 +267,7 @@ public class SparkPCA implements Serializable {
       * 			Maximum number of iterations before terminating
       * @return Matrix of size nCols X nPCs having the desired principal components
       */
-	 public static org.apache.spark.mllib.linalg.Matrix computePrincipalComponents(JavaSparkContext sc, JavaRDD<org.apache.spark.mllib.linalg.Vector> vectors, final int nRows, final int nCols, final int nPCs, final double errRate, final int maxIterations) {
+	 public static org.apache.spark.mllib.linalg.Matrix computePrincipalComponents(JavaSparkContext sc, JavaRDD<org.apache.spark.mllib.linalg.Vector> vectors, String outputPath, final int nRows, final int nCols, final int nPCs, final double errRate, final int maxIterations, final int computeProjectedMatrix) {
 		 	     
 	    System.out.println("Rows: " + nRows + ", Columns " + nCols);
 	    double ss;
@@ -293,6 +354,8 @@ public class SparkPCA implements Serializable {
       
 	  // initial CtC  
 	  Matrix centralCtC= centralC.transpose().times(centralC);
+	  
+	  Matrix centralY2X=null;
 	  // -------------------------- EM Iterations
 	  // while count
 	  int round = 0;
@@ -312,7 +375,7 @@ public class SparkPCA implements Serializable {
 		    centralSx = PCAUtils.inv(centralSx);
 		    	
 		    // X = Y * C * Sx' => Y2X = C * Sx'
-		    Matrix centralY2X =centralC.times(centralSx.transpose());
+		    centralY2X =centralC.times(centralSx.transpose());
 		    
 		    //Broadcast Y2X because it will be used in several jobs and several iterations.
 		    final Broadcast<Matrix> br_centralY2X = sc.broadcast(centralY2X);
@@ -560,7 +623,27 @@ public class SparkPCA implements Serializable {
 		          log.info("... end of computing the error at round " + round + " And error=" + error);
 		      }
 	    }
+	    if(computeProjectedMatrix==1)
+	    {
+		    //7. Compute Projected Matrix Job: The job multiplies the input matrix Y with the principal components C to get the Projected vectors 
+		  	final Broadcast<Matrix> br_centralC = sc.broadcast(centralC);
+		  	 JavaRDD<org.apache.spark.mllib.linalg.Vector> projectedVectors=vectors.map(new Function<org.apache.spark.mllib.linalg.Vector, org.apache.spark.mllib.linalg.Vector>() {
+				
+				public org.apache.spark.mllib.linalg.Vector call(
+						org.apache.spark.mllib.linalg.Vector yi) throws Exception {
+					
+					return PCAUtils.sparseVectorTimesMatrix(yi,br_centralC.value());
+				}
+		    });//End Compute Projected Matrix
+		  	String path=outputPath+ File.separator + "ProjectedMatrix";
+		  	projectedVectors.saveAsTextFile(path);
+	    }
 	    return PCAUtils.convertMahoutToSparkMatrix(centralC);
 	  
 	 }	
+	 private static void printLogMessage(String argName )
+	 {
+		log.error("Missing arguments -D" + argName);
+		log.info("Usage: -DInput=<path/to/input/matrix> -DOutput=<path/to/outputfile> -DRows=<number of rows> -DCols<number of columns> -DPCs<number of principal components> -DErr=[Error sampling rate] -DMaxIter=[max iterations]"); 
+	 }
 }
