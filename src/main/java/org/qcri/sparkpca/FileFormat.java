@@ -35,6 +35,8 @@ public class FileFormat {
 		final InputFormat inputFormat;
 		try {
 			inputPath=System.getProperty("Input");
+			if(inputPath==null)
+				throw new IllegalArgumentException();
 		}
 		catch(Exception e) {
 			printLogMessage("Input");
@@ -53,6 +55,8 @@ public class FileFormat {
 		}
 		try {
 			outputPath=System.getProperty("Output");
+			if(outputPath==null)
+				throw new IllegalArgumentException();
 		}
 		catch(Exception e) {
 			printLogMessage("Output");
@@ -194,7 +198,7 @@ public class FileFormat {
 	private static void printLogMessage(String argName )
 	 {
 		log.error("Missing arguments -D" + argName);
-		log.info("Usage: -DInput=<path/to/input/matrix> -DOutput=<path/to/outputfile> -DInputFmt=<DENSE/COO> -DCardinaality=<number of columns> [-Dbase=<0/1>(0 if input is zero-based, 1 if input is 1-based]"); 
+		log.info("Usage: -DInput=<path/to/input/matrix> -DOutput=<path/to/outputfile> -DInputFmt=<DENSE/COO> -DCardinaality=<number of columns> [-DBase=<0/1>(0 if input is zero-based, 1 if input is 1-based]"); 
 	 }
 	
 }
