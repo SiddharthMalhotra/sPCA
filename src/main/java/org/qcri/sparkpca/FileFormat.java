@@ -103,24 +103,25 @@ public class FileFormat {
 	         
 	         int lineNumber=0;
 	         String thisLine;
-	         String[] filePathList=null;
-	          if(new File(inputPath).isFile()) // if it is a file
+	         File[] filePathList=null;
+	         File inputFile=new File(inputPath);
+	          if(inputFile.isFile()) // if it is a file
 	          { 
-	        	  filePathList= new String[1];
-	        	  filePathList[0]=inputPath;
+	        	  filePathList= new File[1];
+	        	  filePathList[0]=inputFile;
 	          }
 	          else
 	          {
-	        	  filePathList=new File(inputPath).list();
+	        	  filePathList=inputFile.listFiles();
 	          }
 	          if(filePathList==null)
 	          {
 	        	  log.error("The path " + inputPath + " does not exist");
 	          	  return;
 	          }
-	          for(String path:filePathList)
+	          for(File file:filePathList)
 	          {
-		          BufferedReader br = new BufferedReader(new FileReader(inputPath + File.separator + path));
+		          BufferedReader br = new BufferedReader(new FileReader(file));
 		          Vector vector = null;
 		          
 		          while ((thisLine = br.readLine()) != null) { // while loop begins here
