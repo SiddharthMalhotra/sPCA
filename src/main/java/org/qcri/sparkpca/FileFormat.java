@@ -59,7 +59,10 @@ public class FileFormat {
 				throw new IllegalArgumentException();
 			File outputFile=new File(outputPath);
 			if( outputFile.isFile() || outputFile==null )
-				log.warn("Output Path must be a directory, " + outputPath + " is either not a directory or not a valid path");
+			{
+				log.error("Output Path must be a directory, " + outputPath + " is either not a directory or not a valid path");
+				return;
+			}
 		}
 		catch(Exception e) {
 			printLogMessage("Output");
@@ -77,7 +80,7 @@ public class FileFormat {
 			base=Integer.parseInt(System.getProperty("Base"));
 		}
 		catch(Exception e) {
-			log.warn("It is not specified whether the input is zero-based or one-based");
+			log.warn("It is not specified whether the input is zero-based or one-based, this parameter is useful only if the input is in COO format");
 		}
 		
 		switch(inputFormat)
@@ -91,6 +94,7 @@ public class FileFormat {
 			case DENSE:
 				convertFromDenseToSeq(inputPath,cardinality,outputPath);
 		}
+		log.info("Format converted sucessfully");
 		
 	}
 	public static void convertFromDenseToSeq(String inputPath, int cardinality, String outputFolderPath)
@@ -139,7 +143,7 @@ public class FileFormat {
 		        	  }
 		        	  key.set(lineNumber);
 		        	  value.set(vector);
-		        	  System.out.println(vector);
+		        	  //System.out.println(vector);
 		        	  writer.append(key,value);//write last row
 		        	  lineNumber++;
 		          }
@@ -151,50 +155,72 @@ public class FileFormat {
 	    	}
 	    	
 	}
-	public static void convertFromCooToSeq(String inputCooFile, int cardinality, int base, String outputFile){
+	public static void convertFromCooToSeq(String inputPath, int cardinality, int base, String outputFolderPath){
     	try
     	{
     	 final Configuration conf = new Configuration();
          final FileSystem fs = FileSystem.get(conf);
-         final SequenceFile.Writer writer = SequenceFile.createWriter(fs, conf, new Path(outputFile), IntWritable.class, VectorWritable.class, CompressionType.BLOCK);
+         SequenceFile.Writer writer;
 
          final IntWritable key = new IntWritable();
          final VectorWritable value = new VectorWritable();
          
     
           String thisLine;
-          BufferedReader br = new BufferedReader(new FileReader(inputCooFile));
-          Vector vector = null;
+          
           int lineNumber=0;
-          int prevRowID=1;
-          //boolean first=true;
-          while ((thisLine = br.readLine()) != null) { // while loop begins here   		   
-        	  String [] splitted = thisLine.split(",");
-        	  int rowID=Integer.parseInt(splitted[0]);
-        	  int colID=Integer.parseInt(splitted[1]);
-        	  double element=Integer.parseInt(splitted[2]);
-        	  if(lineNumber==1)
-        	  {
-        		  //first=false;
-        		  vector = new SequentialAccessSparseVector(cardinality);
-        	  }
-        	  else if(rowID != prevRowID)
-        	  {
-        		  key.set(prevRowID-base);
-        		  value.set(vector);
-            	  //System.out.println(vector);
-            	  writer.append(key,value);//write last row
-            	  vector = new SequentialAccessSparseVector(cardinality);
-        	  }
-        	  prevRowID=rowID;
-        	  vector.set(colID-base,element);
+          int prevRowID=-1;
+          boolean first=true;
+          File[] filePathList=null;
+	      File inputFile=new File(inputPath);
+          if(inputFile.isFile()) // if it is a file
+          { 
+        	  filePathList= new File[1];
+        	  filePathList[0]=inputFile;
           }
-          key.set(prevRowID-base);
-          value.set(vector);
-          //System.out.println("last vector");
-          //System.out.println(vector);
-    	  writer.append(key,value);//write last row
-          writer.close();
+          else
+          {
+        	  filePathList=inputFile.listFiles();
+          }
+          if(filePathList==null)
+          {
+        	  log.error("The path " + inputPath + " does not exist");
+          	  return;
+          }
+          for(File file:filePathList)
+          {
+        	  BufferedReader br = new BufferedReader(new FileReader(file));
+        	  Vector vector = null;
+        	  String outputFileName=outputFolderPath+ File.separator + file.getName() + ".seq";
+	          writer=SequenceFile.createWriter(fs, conf, new Path(outputFileName), IntWritable.class, VectorWritable.class, CompressionType.BLOCK);
+	          while ((thisLine = br.readLine()) != null) { // while loop begins here   		   
+	        	  String [] splitted = thisLine.split(",");
+	        	  int rowID=Integer.parseInt(splitted[0]);
+	        	  int colID=Integer.parseInt(splitted[1]);
+	        	  double element=Double.parseDouble(splitted[2]);
+	        	  if(first)
+	        	  {
+	        		  first=false;
+	        		  vector = new SequentialAccessSparseVector(cardinality);
+	        	  }
+	        	  else if(rowID != prevRowID)
+	        	  {
+	        		  key.set(prevRowID);
+	        		  value.set(vector);
+	            	  //System.out.println(vector);
+	            	  writer.append(key,value);//write last row
+	            	  vector = new SequentialAccessSparseVector(cardinality);
+	        	  }
+	        	  prevRowID=rowID;
+	        	  vector.set(colID-base,element);
+	          }
+	          key.set(prevRowID);
+	          value.set(vector);
+	          //System.out.println("last vector");
+	          //System.out.println(vector);
+	    	  writer.append(key,value);//write last row
+	          writer.close();
+          }
           
     	}
     	catch (Exception e) {
@@ -204,7 +230,7 @@ public class FileFormat {
 	private static void printLogMessage(String argName )
 	 {
 		log.error("Missing arguments -D" + argName);
-		log.info("Usage: -DInput=<path/to/input/matrix> -DOutput=<path/to/outputfile> -DInputFmt=<DENSE/COO> -DCardinaality=<number of columns> [-DBase=<0/1>(0 if input is zero-based, 1 if input is 1-based]"); 
+		log.info("Usage: -DInput=<path/to/input/matrix> -DOutput=<path/to/outputfolder> -DInputFmt=<DENSE/COO> -DCardinaality=<number of columns> [-DBase=<0/1>(0 if input is zero-based, 1 if input is 1-based]"); 
 	 }
 	
 }
