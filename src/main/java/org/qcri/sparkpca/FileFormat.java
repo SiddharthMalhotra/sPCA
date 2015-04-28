@@ -57,6 +57,9 @@ public class FileFormat {
 			outputPath=System.getProperty("Output");
 			if(outputPath==null)
 				throw new IllegalArgumentException();
+			File outputFile=new File(outputPath);
+			if( outputFile.isFile() || outputFile==null )
+				log.warn("Output Path must be a directory, " + outputPath + " is either not a directory or not a valid path");
 		}
 		catch(Exception e) {
 			printLogMessage("Output");
@@ -90,13 +93,13 @@ public class FileFormat {
 		}
 		
 	}
-	public static void convertFromDenseToSeq(String inputPath, int cardinality, String outputPath)
+	public static void convertFromDenseToSeq(String inputPath, int cardinality, String outputFolderPath)
 	{
 		try
     	{
 	    	 final Configuration conf = new Configuration();
 	         final FileSystem fs = FileSystem.get(conf);
-	         final SequenceFile.Writer writer = SequenceFile.createWriter(fs, conf, new Path(outputPath), IntWritable.class, VectorWritable.class, CompressionType.BLOCK);
+	         SequenceFile.Writer writer;
 	
 	         final IntWritable key = new IntWritable();
 	         final VectorWritable value = new VectorWritable();
@@ -123,9 +126,11 @@ public class FileFormat {
 	          {
 		          BufferedReader br = new BufferedReader(new FileReader(file));
 		          Vector vector = null;
-		          
+		          String outputFileName=outputFolderPath+ File.separator + file.getName() + ".seq";
+		          writer=SequenceFile.createWriter(fs, conf, new Path(outputFileName), IntWritable.class, VectorWritable.class, CompressionType.BLOCK);
 		          while ((thisLine = br.readLine()) != null) { // while loop begins here
-		              
+		              if(thisLine.isEmpty())
+		            	  continue;
 		        	  String [] splitted = thisLine.split("\\s+");
 		        	  vector = new SequentialAccessSparseVector(splitted.length);
 		        	  for (int i=0; i < splitted.length; i++)
