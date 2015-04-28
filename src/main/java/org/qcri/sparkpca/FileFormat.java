@@ -91,10 +91,12 @@ public class FileFormat {
 					return;
 				}
 				convertFromCooToSeq(inputPath,cardinality,base,outputPath);
+				break;
 			case DENSE:
 				convertFromDenseToSeq(inputPath,cardinality,outputPath);
+				break;
 		}
-		log.info("Format converted sucessfully");
+		
 		
 	}
 	public static void convertFromDenseToSeq(String inputPath, int cardinality, String outputFolderPath)
@@ -153,6 +155,7 @@ public class FileFormat {
 	    	catch (Exception e) {
 	    		e.printStackTrace();
 	    	}
+		log.info("Format converted sucessfully");
 	    	
 	}
 	public static void convertFromCooToSeq(String inputPath, int cardinality, int base, String outputFolderPath){
@@ -226,6 +229,7 @@ public class FileFormat {
     	catch (Exception e) {
     		e.printStackTrace();
     	}
+    	log.info("Format converted sucessfully");
     }
 	private static void printLogMessage(String argName )
 	 {
