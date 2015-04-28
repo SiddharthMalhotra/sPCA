@@ -80,6 +80,8 @@ public class SparkPCA implements Serializable {
 		
 		try {
 			inputPath=System.getProperty("Input");
+			if(inputPath==null)
+				throw new IllegalArgumentException();
 		}
 		catch(Exception e) {
 			printLogMessage("Input");
@@ -87,6 +89,8 @@ public class SparkPCA implements Serializable {
 		}
 		try {
 			outputPath=System.getProperty("Output");
+			if(outputPath==null)
+				throw new IllegalArgumentException();
 		}
 		catch(Exception e) {
 			printLogMessage("Output");
