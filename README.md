@@ -1,4 +1,4 @@
-ScalablePCA
+sPCA
 ===========
 
 Scalable PCA (sPCA) is a scalable implementation of Principal component analysis (PCA) algorithm on top of Spark. sPCA has been tested on Apache Spark 1.0.0 and Linux OS. It should work with more recent Spark versions with only minor modifications; however, switching to another platform (e.g., Mac) will require recompiling the jars. In the following, we will take you through running PCA on a toy matrix. We will use Spark local mode which does not require setting up a cluster.
@@ -19,11 +19,11 @@ SPARK_HOME/bin/run-example SparkPi 10
 ```
 After the above Spark local program finishes, you should see the computed value of pi (something that's reasonably close to 3.14).
 
-Clone the ScalablePCA repo
+Clone the sPCA repo
 ==========================
 Open the shell and clone the ScalablePCA github repo:
 ```
-git clone https://github.com/Qatar-Computing-Research-Institute/ScalablePCA
+git clone https://github.com/Qatar-Computing-Research-Institute/sPCA
 ```
 In order to build sPCA source code, you need to install maven. You can download and install maven by folliwng this [quick tutorial] (http://maven.apache.org/guides/getting-started/maven-in-five-minutes.html). To verify that maven is installed, run the following 
 command:
@@ -33,7 +33,7 @@ mvn --version
 It should print out your installed version of Maven. After that, you can build sPCA by typing:
 
 ```
-cd ScalablePCA/
+cd sPCA/
 mvn package
 ```
 To make sure that the code is build successfully, You should see something like the following:
@@ -42,13 +42,13 @@ To make sure that the code is build successfully, You should see something like 
 [INFO] BUILD SUCCESS
 [INFO] ------------------------------------------------------------------------
 ```
-Moreover, you will find a .jar file generated under `ScalablePCA/target/SparkPCA.jar`. This jar file will be used to run the example in the following step.
+Moreover, you will find a .jar file generated under `sPCA/target/SparkPCA.jar`. This jar file will be used to run the example in the following step.
 
 Running ScalablePCA in the local mode
 =====================================
 The next step is to run sPCA on a small toy matrix. There is an example script located in `ScalablePCA/spca-example.sh`. you can run it through the following command:
 ```
-./ScalablePCA/spca-example.sh
+./sPCA/spca-example.sh
 ```
 The example involves a command similar to the following:
 ```
