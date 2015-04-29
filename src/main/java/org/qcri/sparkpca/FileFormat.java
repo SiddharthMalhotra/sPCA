@@ -163,11 +163,12 @@ public class FileFormat {
     	{
     	 final Configuration conf = new Configuration();
          final FileSystem fs = FileSystem.get(conf);
-         SequenceFile.Writer writer;
+         SequenceFile.Writer writer=null;
 
          final IntWritable key = new IntWritable();
          final VectorWritable value = new VectorWritable();
          
+         Vector vector = null;
     
           String thisLine;
           
@@ -193,7 +194,6 @@ public class FileFormat {
           for(File file:filePathList)
           {
         	  BufferedReader br = new BufferedReader(new FileReader(file));
-        	  Vector vector = null;
         	  String outputFileName=outputFolderPath+ File.separator + file.getName() + ".seq";
 	          writer=SequenceFile.createWriter(fs, conf, new Path(outputFileName), IntWritable.class, VectorWritable.class, CompressionType.BLOCK);
 	          while ((thisLine = br.readLine()) != null) { // while loop begins here   		   
@@ -217,6 +217,17 @@ public class FileFormat {
 	        	  prevRowID=rowID;
 	        	  vector.set(colID-base,element);
 	          }
+	          /*//here we append the last vector in each file (assuming that we will start a new row in the next file
+	          key.set(prevRowID);
+	          value.set(vector);
+	          //System.out.println("last vector");
+	          //System.out.println(vector);
+	    	  writer.append(key,value);//write last row
+	          writer.close();
+	          */
+          }
+          if(writer!=null) //append last vector in last file
+          {
 	          key.set(prevRowID);
 	          value.set(vector);
 	          //System.out.println("last vector");
