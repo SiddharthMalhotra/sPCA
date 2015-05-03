@@ -70,5 +70,4 @@ This command runs sPCA on top of Spark in the local machine with one worker thre
 -	`[<Error sampling rate>](optional):` The error sampling rate [0-1] that is used for computing the error, It can be set to 0.01 to compute the error for only a small sample of the matrix, this speeds up the computations significantly 
 - `[<max iterations>] (optional):` Maximum number of iterations before terminating, the default is 3
 - `[<output format>] (optional):` One of three supported output formats (DENSE/COO/LIL), the default is DENSE. See Section Input/Output formats for more details.
-- 
 
