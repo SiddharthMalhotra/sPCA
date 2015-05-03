@@ -33,7 +33,7 @@ mvn --version
 It should print out your installed version of Maven. After that, you can build sPCA by typing:
 
 ```
-cd sPCA/
+cd sPCA/spca-spark
 mvn package
 ```
 To make sure that the code is build successfully, You should see something like the following:
@@ -42,25 +42,33 @@ To make sure that the code is build successfully, You should see something like 
 [INFO] BUILD SUCCESS
 [INFO] ------------------------------------------------------------------------
 ```
-Moreover, you will find a .jar file generated under `sPCA/target/SparkPCA.jar`. This jar file will be used to run the example in the following step.
+Moreover, you will find a .jar file generated under `sPCA/spca-spark/target/SparkPCA.jar`. This jar file will be used to run the example in the following step.
 
-Running ScalablePCA in the local mode
+Input/Output Formats
 =====================================
-The next step is to run sPCA on a small toy matrix. There is an example script located in `ScalablePCA/spca-example.sh`. you can run it through the following command:
+
+
+Running sPCA in the local mode
+=====================================
+The next step is to run sPCA on a small toy matrix. There is an example script located in `sPCA/spca-spark/spca-example.sh`. you can run it through the following command:
 ```
-./sPCA/spca-example.sh
+./sPCA/spca-spark/spca-example.sh
 ```
 The example involves a command similar to the following:
 ```
 SPARK_HOME/bin/spark-submit --class org.qcri.sparkpca.SparkPCA --master <master-url> target/sparkPCA-1.0.jar  <path/to/input/matrix> <path/to/outputfile> <number of rows> <number of columns> <number of principal components> [<Error sampling rate>] [<max iterations>]
+
+$SPARK_HOME/bin/spark-submit --class org.qcri.sparkpca.SparkPCA --master $master_url --driver-java-options "-DInput=<path/to/input/matrix>s-DOutput=<path/to/outputfolder> -DRows=<number of rows> -DCols=<number of columns> -DPCs= <number of principal components> [-DErrSampleRate=<Error sampling rate>] [-DMaxIter=<max iterations>] [-DOutFmt=<output format>] [-DOutFmt=<output format> [-DComputeProjectedMatrix=<0/1 (compute projected matrix or not)>]" target/sparkPCA-1.0.jar 
 ```
 This command runs sPCA on top of Spark in the local machine with one worker thread. The following is a description of the command-line arguments of sPCA. 
 - `<master-url>: `The master URL for the cluster (e.g. spark://23.195.26.187:7077), it is set to `local[K]` for running Spark in the local mode with *K* threads (ideally, set *K* to the number of cores on your machine). If this argument is set to `local`, the applications runs locally on one worker thread (i.e., no parlellism at all).
--	`<path/to/input/matrix>:` directory that contains an example input matrix in the sequenceFileFormat `<IntWritable key, VectorWritable value>`.
--	`<path/to/outputfile>:` The file where the resulting principal components is written
+-	`<path/to/input/matrix>:` File or directory that contains an example input matrix in the sequenceFileFormat `<IntWritable key, VectorWritable value>`.
+-	`<path/to/outputfolder>:` The directory where the resulting principal components is written
 -	`<number of rows>:` Number of rows for the input matrix 
 -	`<number of columns>:` Number of columns for the input matrix 
 -	`<number of principal components>:` Number of desired principal components 
 -	`[<Error sampling rate>](optional):` The error sampling rate [0-1] that is used for computing the error, It can be set to 0.01 to compute the error for only a small sample of the matrix, this speeds up the computations significantly 
-- `[<max iterations>] (optional):` Maximum number of iterations before terminating, the default is 3 
+- `[<max iterations>] (optional):` Maximum number of iterations before terminating, the default is 3
+- `[<output format>] (optional):` One of three supported output formats (DENSE/COO/LIL), the default is DENSE. See Section Input/Output formats for more details.
+- 
 
