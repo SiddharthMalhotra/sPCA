@@ -50,14 +50,16 @@ Input/Output Formats
 
 Running sPCA in the local mode
 =====================================
-The next step is to run sPCA on a small toy matrix. There is an example script located in `sPCA/spca-spark/spca-example.sh`. you can run it through the following command:
+The next step is to run sPCA on a small toy matrix. There is an example script located in `sPCA/spca-spark/spca-example.sh`. First, you need to set the environment variable `SPARK_HOME` to the directory where Spark is downloaded and installed:
+```
+export SPARK_HOME=<path/to/spark/directory> (e.g., /usr/lib/spark-1.0.0)
+```
+You can then run the example through the following command:
 ```
 ./sPCA/spca-spark/spca-example.sh
 ```
 The example involves a command similar to the following:
 ```
-SPARK_HOME/bin/spark-submit --class org.qcri.sparkpca.SparkPCA --master <master-url> target/sparkPCA-1.0.jar  <path/to/input/matrix> <path/to/outputfile> <number of rows> <number of columns> <number of principal components> [<Error sampling rate>] [<max iterations>]
-
 $SPARK_HOME/bin/spark-submit --class org.qcri.sparkpca.SparkPCA --master $master_url --driver-java-options "-DInput=<path/to/input/matrix>s-DOutput=<path/to/outputfolder> -DRows=<number of rows> -DCols=<number of columns> -DPCs= <number of principal components> [-DErrSampleRate=<Error sampling rate>] [-DMaxIter=<max iterations>] [-DOutFmt=<output format>] [-DOutFmt=<output format> [-DComputeProjectedMatrix=<0/1 (compute projected matrix or not)>]" target/sparkPCA-1.0.jar 
 ```
 This command runs sPCA on top of Spark in the local machine with one worker thread. The following is a description of the command-line arguments of sPCA. 
@@ -70,4 +72,4 @@ This command runs sPCA on top of Spark in the local machine with one worker thre
 -	`[<Error sampling rate>](optional):` The error sampling rate [0-1] that is used for computing the error, It can be set to 0.01 to compute the error for only a small sample of the matrix, this speeds up the computations significantly 
 - `[<max iterations>] (optional):` Maximum number of iterations before terminating, the default is 3
 - `[<output format>] (optional):` One of three supported output formats (DENSE/COO/LIL), the default is DENSE. See Section Input/Output formats for more details.
-
+- `[<0/1 (compute projected matrix or not)>] (optional)` :  0 or 1 value that specifies whether the user wants to project the input matrix on the principal components or not. 1 means that the projected matrix will be computed, and 0 means it will not be computed. The projected matrix is writted in the output folder specified  by `-DOutput`
