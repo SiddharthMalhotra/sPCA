@@ -79,7 +79,7 @@ public class ReconstructionErrJob extends AbstractJob {
   public static final String XCOLS = "xDimension";
   public static final String ZMPATH = "zmPath";
   public static final String YMPATH = "ymPath";
-  public static final String ERRSAMPLERATE = "errRate";
+  public static final String ERRSAMPLERATE = "errSampleRate";
   
   /**
    * The norm of the reconstruction error matrix

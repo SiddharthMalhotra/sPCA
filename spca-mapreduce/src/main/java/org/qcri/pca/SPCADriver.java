@@ -66,13 +66,14 @@ public class SPCADriver extends AbstractJob {
   private static final String COLSOPTION = "D";
   private static final String PRINCIPALSOPTION = "d";
   private static final String SPLITFACTOROPTION = "sf";
-  private static final String ERRSAMPLE = "errRate";
+  private static final String ERRSAMPLE = "errSampleRate";
+  private static final String MAXITER = "maxIter";
+  private static final String NORMALIZEOPTION = "normalize";
   private static final boolean CALCULATE_ERR_ATTHEEND = false;
 
   /**
    * The sampling rate that is used for computing the reconstruction error
    */
-  static float ERR_SAMPLE_RATE = 1.00f; // 100% default
 
   @Override
   public int run(String[] args) throws Exception {
@@ -83,8 +84,12 @@ public class SPCADriver extends AbstractJob {
     addOption(COLSOPTION, "cols", "Number of cols");
     addOption(PRINCIPALSOPTION, "pcs", "Number of principal components");
     addOption(SPLITFACTOROPTION, "sf", "Split each block to increase paralelism");
-    addOption(ERRSAMPLE, "errRate",
+    addOption(ERRSAMPLE, "errSampleRate",
         "Sampling rate for computing the error (0-1]");
+    addOption(MAXITER, "maxIter",
+            "Maximum number of iterations before terminating, the default is 3");
+    addOption(NORMALIZEOPTION, "normalize",
+            "Choose whether you want the input matrix to be  normalized or not, 1 means normalize, 0 means don't normalize");
     if (parseArguments(args) == null) {
       return -1;
     }
@@ -93,28 +98,53 @@ public class SPCADriver extends AbstractJob {
     final int nRows = Integer.parseInt(getOption(ROWSOPTION));
     final int nCols = Integer.parseInt(getOption(COLSOPTION));
     final int nPCs = Integer.parseInt(getOption(PRINCIPALSOPTION));
-    final int splitFactor = Integer.parseInt(getOption(SPLITFACTOROPTION, "1"));
+    final int splitFactor;
+    final int normalize;
+    final int maxIterations;
+    final float errSampleRate;
+    if(hasOption(SPLITFACTOROPTION))
+    	splitFactor= Integer.parseInt(getOption(SPLITFACTOROPTION, "1"));
+    else
+    	splitFactor=1;
     if (hasOption(ERRSAMPLE))
-      ERR_SAMPLE_RATE = Float.parseFloat(getOption(ERRSAMPLE));
-
+    	errSampleRate = Float.parseFloat(getOption(ERRSAMPLE));
+    else 
+    {
+    	 int length = String.valueOf(nRows).length();
+    	 if(length <= 4)
+    		 errSampleRate= 1;
+         else
+        	 errSampleRate=(float) (1/Math.pow(10, length-4));
+    	 log.warn("error sampling rate set to:  errRate=" + errSampleRate);
+    }
+    	
+    if (hasOption(MAXITER))
+       maxIterations = Integer.parseInt(getOption(MAXITER));
+    else
+    	maxIterations=3;
+    if (hasOption(NORMALIZEOPTION))
+       normalize = Integer.parseInt(getOption(NORMALIZEOPTION));
+    else
+    	normalize=0;
+    
     Configuration conf = getConf();
     if (conf == null) {
       throw new IOException("No Hadoop configuration present");
     }
     boolean runSequential = getOption(DefaultOptionCreator.METHOD_OPTION)
         .equalsIgnoreCase(DefaultOptionCreator.SEQUENTIAL_METHOD);
-    run(conf, input, output, nRows, nCols, nPCs, splitFactor, runSequential);
+    run(conf, input, output, nRows, nCols, nPCs, splitFactor, errSampleRate, maxIterations, normalize, runSequential);
     return 0;
   }
 
   public void run(Configuration conf, Path input, Path output, final int nRows,
-      final int nCols, final int nPCs, final int splitFactor, final boolean runSequential)
+      final int nCols, final int nPCs, final int splitFactor, final float errRate, final int maxIterations, final int normalize, final boolean runSequential)
       throws Exception {
     System.gc();
     if (runSequential)
       runSequential(conf, input, output, nRows, nCols, nPCs);
     else
-      runMapReduce(conf, input, output, nRows, nCols, nPCs, splitFactor);
+      runMapReduce(conf, input, output, nRows, nCols, nPCs, splitFactor, errRate, maxIterations, normalize);
   }
 
   /**
@@ -138,7 +168,7 @@ public class SPCADriver extends AbstractJob {
    * @throws Exception
    */
   double runMapReduce(Configuration conf, Path input, Path output, final int nRows,
-      final int nCols, final int nPCs, final int splitFactor) throws Exception {
+      final int nCols, final int nPCs, final int splitFactor, final float errRate, final int maxIterations, final int normalize) throws Exception {
     Matrix centC = PCACommon.randomMatrix(nCols, nPCs);
     double ss = PCACommon.randSS();
     InitialValues initVal = new InitialValues(centC, ss);
@@ -153,7 +183,7 @@ public class SPCADriver extends AbstractJob {
      * runMapReduce(conf, distY, initVal, ..., 14, 1, 1);
      */
     double error = runMapReduce(conf, distY, initVal, output, nRows, nCols, nPCs,
-        splitFactor, 1, 3, 1);
+        splitFactor, 1, maxIterations, 1);
     return error;
   }
 
@@ -185,34 +215,46 @@ public class SPCADriver extends AbstractJob {
    */
   double runMapReduce(Configuration conf, DistributedRowMatrix distY,
       InitialValues initVal, Path output, final int nRows, final int nCols,
-      final int nPCs, final int splitFactor, int round, final int LAST_ROUND,
-      final double sampleRate) throws Exception {
-    final int firstRound = round;
+      final int nPCs, final int splitFactor, final int errSampleRate, final int LAST_ROUND,
+      final int normalize) throws Exception {
+    int round = 0;
     //The two PPCA variables that improve over each iteration
     double ss = initVal.ss;
     Matrix centralC = initVal.C;
     //initial CtC
     Matrix centralCtC = centralC.transpose().times(centralC);
     final float threshold = 0.00001f;
-    
+    int sampleRate=1;
     //1. compute mean and span
     DenseVector ym = new DenseVector(distY.numCols()); //ym=mean(distY)
     MeanAndSpanJob masJob = new MeanAndSpanJob();
+    boolean normalizeMean=false;
+    if (normalize==1)
+    	normalizeMean=true;
     Path meanSpanPath = masJob.compuateMeanAndSpan(distY.getRowPath(),
-        output, ym, MeanAndSpanJob.NORMALIZE_MEAN, conf, ""+round+"-init");
+        output, ym, normalizeMean, conf, ""+round+"-init");
+    Path normalizedYPath=null;
+    
     //2. normalize the input matrix Y
-    NormalizeJob normalizeJob = new NormalizeJob();
-    Path normalizedYPath = normalizeJob.normalize(conf, distY.getRowPath(),
-        meanSpanPath, output, sampleRate, ""+round+"-init");
-    distY = new DistributedRowMatrix(normalizedYPath, getTempPath(), nRows,
-        nCols);
-    distY.setConf(conf);
-    //After normalization, set the split factor
-    if (splitFactor > 1) {
-      FileSystem fss = FileSystem.get(normalizedYPath.toUri(), conf);
-      long blockSize = fss.getDefaultBlockSize() / splitFactor;
-      conf.set("mapred.max.split.size", Long.toString(blockSize));
-    }
+    if(normalize==1)
+    {
+	   
+	    NormalizeJob normalizeJob = new NormalizeJob();
+	    normalizedYPath = normalizeJob.normalize(conf, distY.getRowPath(),
+	        meanSpanPath, output, sampleRate, ""+round+"-init");
+	    distY = new DistributedRowMatrix(normalizedYPath, getTempPath(), nRows,
+	        nCols);
+	    distY.setConf(conf);
+	    //After normalization, set the split factor
+	    if (splitFactor > 1) {
+	      FileSystem fss = FileSystem.get(normalizedYPath.toUri(), conf);
+	      long blockSize = fss.getDefaultBlockSize() / splitFactor;
+	      conf.set("mapred.max.split.size", Long.toString(blockSize));
+	    }
+	}
+    if(normalizedYPath==null)
+    	normalizedYPath=distY.getRowPath();
+    
     //3. compute the 2-norm of Y
     Norm2Job normJob = new Norm2Job();
     double norm2 = normJob.computeFNorm(conf, normalizedYPath,
@@ -228,8 +270,7 @@ public class SPCADriver extends AbstractJob {
     double prevObjective = Double.MAX_VALUE;
     double error = 0;
     double relChangeInObjective = Double.MAX_VALUE;
-    for (; round <= LAST_ROUND
-        && ((round - firstRound) <= 5 || relChangeInObjective > threshold); round++) {
+    for (; (round < LAST_ROUND && relChangeInObjective > threshold); round ++) {
       // Sx = inv( ss * eye(d) + CtC );
       Matrix centralSx = centralCtC.clone();
       centralSx.viewDiagonal().assign(Functions.plus(ss));
@@ -297,7 +338,7 @@ public class SPCADriver extends AbstractJob {
         log.info("Computing the error at round " + round + " ...");
         ReconstructionErrJob errJob = new ReconstructionErrJob();
         error = errJob.reconstructionErr(distY, distY2X, distC, centralC, ym,
-            xm, ERR_SAMPLE_RATE, conf, getTempPath(), "" + round);
+            xm, errSampleRate, conf, getTempPath(), "" + round);
         log.info("... end of computing the error at round " + round);
       }
     }
@@ -306,7 +347,7 @@ public class SPCADriver extends AbstractJob {
       log.info("Computing the error at round " + round + " ...");
       ReconstructionErrJob errJob = new ReconstructionErrJob();
       error = errJob.reconstructionErr(distY, distY2X, distC, centralC, ym,
-          xm, ERR_SAMPLE_RATE, conf, getTempPath(), "" + round);
+          xm, errSampleRate, conf, getTempPath(), "" + round);
       log.info("... end of computing the error at round " + round);
     }
 
