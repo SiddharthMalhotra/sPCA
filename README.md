@@ -21,7 +21,7 @@ After the above Spark local program finishes, you should see the computed value 
 
 Clone the sPCA repo
 ==========================
-Open the shell and clone the ScalablePCA github repo:
+Open the shell and clone the sPCA github repo:
 ```
 git clone https://github.com/Qatar-Computing-Research-Institute/sPCA
 ```
