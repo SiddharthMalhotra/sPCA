@@ -56,11 +56,12 @@ export SPARK_HOME=<path/to/spark/directory> (e.g., /usr/lib/spark-1.0.0)
 ```
 You can then run the example through the following command:
 ```
-./sPCA/spca-spark/spca-example.sh
+./sPCA/spca-spark/spca-example.sh local
 ```
+where `local` means that the Spark code will run on the local machine. If the examples runs correctly, you should see a message saying `Principal components computed successfully`. The output will be written in `./sPCA/spca-spark/output/`.
 The example involves a command similar to the following:
 ```
-$SPARK_HOME/bin/spark-submit --class org.qcri.sparkpca.SparkPCA --master $master_url --driver-java-options "-DInput=<path/to/input/matrix>s-DOutput=<path/to/outputfolder> -DRows=<number of rows> -DCols=<number of columns> -DPCs= <number of principal components> [-DErrSampleRate=<Error sampling rate>] [-DMaxIter=<max iterations>] [-DOutFmt=<output format>] [-DOutFmt=<output format> [-DComputeProjectedMatrix=<0/1 (compute projected matrix or not)>]" target/sparkPCA-1.0.jar 
+$SPARK_HOME/bin/spark-submit --class org.qcri.sparkpca.SparkPCA --master <master_url> --driver-java-options "-DInput=<path/to/input/matrix>s-DOutput=<path/to/outputfolder> -DRows=<number of rows> -DCols=<number of columns> -DPCs= <number of principal components> [-DErrSampleRate=<Error sampling rate>] [-DMaxIter=<max iterations>] [-DOutFmt=<output format>] [-DOutFmt=<output format> [-DComputeProjectedMatrix=<0/1 (compute projected matrix or not)>]" target/sparkPCA-1.0.jar 
 ```
 This command runs sPCA on top of Spark in the local machine with one worker thread. The following is a description of the command-line arguments of sPCA. 
 - `<master-url>: `The master URL for the cluster (e.g. spark://23.195.26.187:7077), it is set to `local[K]` for running Spark in the local mode with *K* threads (ideally, set *K* to the number of cores on your machine). If this argument is set to `local`, the applications runs locally on one worker thread (i.e., no parlellism at all).
@@ -72,4 +73,4 @@ This command runs sPCA on top of Spark in the local machine with one worker thre
 -	`[<Error sampling rate>](optional):` The error sampling rate [0-1] that is used for computing the error, It can be set to 0.01 to compute the error for only a small sample of the matrix, this speeds up the computations significantly 
 - `[<max iterations>] (optional):` Maximum number of iterations before terminating, the default is 3
 - `[<output format>] (optional):` One of three supported output formats (DENSE/COO/LIL), the default is DENSE. See Section Input/Output formats for more details.
-- `[<0/1 (compute projected matrix or not)>] (optional)` :  0 or 1 value that specifies whether the user wants to project the input matrix on the principal components or not. 1 means that the projected matrix will be computed, and 0 means it will not be computed. The projected matrix is writted in the output folder specified  by `-DOutput`
+- `[<0/1 (compute projected matrix or not)>] (optional)` :  0 or 1 value that specifies whether the user wants to project the input matrix on the principal components or not. 1 means that the projected matrix will be computed, and 0 means it will not be computed. The projected matrix is written in the output folder specified  by `-DOutput`
