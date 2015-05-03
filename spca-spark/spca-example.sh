@@ -5,7 +5,7 @@
 #  --master <master-url> \
 #  ... # other options
 #  ./target/sparkPCA-1.0.jar \
-#  -DInput=<path/to/input/matrix> -DOutput=<path/to/outputfile> -DRows=<number of rows> -DCols=<number of columns> -DPCs=<number of principal components> [-DErr=<error sampling rate>] [-DMaxIter=<max iterations>] [-DComputeProjectedMatrix=<1/0>] [-DOutFmt=<output format>] 
+#  -DInput=<path/to/input/matrix> -DOutput=<path/to/outputfile> -DRows=<number of rows> -DCols=<number of columns> -DPCs=<number of principal components> [-DErrSampleRate=<error sampling rate>] [-DMaxIter=<max iterations>] [-DComputeProjectedMatrix=<1/0>] [-DOutFmt=<output format>] 
 
 
 
@@ -28,4 +28,4 @@ if [  $# -lt 1 ]
 master_url=$1  #master url has two options (local, spark://<IP>:7077) 
 SCRIPT=$(readlink -f $0) # Absolute path to this script.
 SCRIPTPATH=`dirname $SCRIPT` # Absolute path this script is in. /home/user/bin
-$SPARK_HOME/bin/spark-submit --class org.qcri.sparkpca.SparkPCA --master $master_url --driver-java-options "-DInput=$SCRIPTPATH/input/seqfiles -DOutput=$SCRIPTPATH/output -DRows=7 -DCols=5 -DPCs=3 -DErr=1 -DMaxIter=3" $SCRIPTPATH/target/sparkPCA-1.0.jar 
+$SPARK_HOME/bin/spark-submit --class org.qcri.sparkpca.SparkPCA --master $master_url --driver-java-options "-DInput=$SCRIPTPATH/input/seqfiles -DOutput=$SCRIPTPATH/output -DRows=7 -DCols=5 -DPCs=3 -DErrSampleRate=1 -DMaxIter=3" $SCRIPTPATH/target/sparkPCA-1.0.jar 

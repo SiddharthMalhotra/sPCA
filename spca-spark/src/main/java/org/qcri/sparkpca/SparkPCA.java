@@ -127,7 +127,7 @@ public class SparkPCA implements Serializable {
 		 OutputFormat outputFileFormat=OutputFormat.DENSE;
 		 int computeProjectedMatrix=0;
 	     try {
-	    	 errRate= Float.parseFloat(System.getProperty("Err"));
+	    	 errRate= Float.parseFloat(System.getProperty("ErrSampleRate"));
 	     }
 	     catch(Exception e) {
 	    	
@@ -136,7 +136,7 @@ public class SparkPCA implements Serializable {
 	    		 errRate= 1;
 	         else
 	        	 errRate=1/Math.pow(10, length-4);
-	    	 log.warn("error sampling rate set to:  errRate=" + errRate);
+	    	 log.warn("error sampling rate set to:  ErrSampleRate=" + errRate);
 	     }
 	     try {
 	    	 maxIterations=Integer.parseInt(System.getProperty("MaxIter"));
@@ -368,8 +368,7 @@ public class SparkPCA implements Serializable {
 	  double relChangeInObjective = Double.MAX_VALUE;
 	  final float threshold = 0.00001f;
 	  final int firstRound=round;
-	  for (; round <= maxIterations
-	        && ((round - firstRound) <= 10 || relChangeInObjective > threshold); round++) {
+	  for (; (round < maxIterations && relChangeInObjective > threshold); round++) {
 
 		    // Sx = inv( ss * eye(d) + CtC );
 		    Matrix centralSx = centralCtC.clone();
