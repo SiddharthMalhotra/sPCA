@@ -47,7 +47,7 @@ Moreover, you will find a .jar file generated under `sPCA/spca-spark/target/Spar
 Input Format
 =====================================
 sPCA accepts the input matrix in the Hadoop [SequenceFile](http://hadoop.apache.org/docs/r2.6.0/api/org/apache/hadoop/io/SequenceFile.html) format. However,sPCA provides an auxiliary class to convert two other formats in to the SequenceFile format. The two formats are:
-- `Dense Matrix Format:` We refer to this format as `DENSE`. Each row of the matrix is stored in one line and the elements in each row are separated by white spaces. The input can be one file or a directory with multiple files.
+- `Dense Matrix Format:` We refer to this format as `DENSE`. DENSE stores one line for each row and the values in each row are separated by white spaces. The input can be one file or a directory with multiple files.
 - `Coordinate List Format:` We refer to this format as `COO`. COO stores a list of (row, column, value) tuples. The indices are sorted by row index then column index. The input can be one file or a directory with multiple files.
 
 The repository contains some examples from both formats under the directory `sPCA/spca-spark/input`. The following shows an example of how to convert them to the SequenceFile format:
@@ -66,7 +66,12 @@ The parameters are described as follows:
 
 Output Format
 =====================================
-
+sPCA supports three types of output format, one for dense matrices, and two for sparse matrices. We describe them as follows:
+- `Dense Matrix Format:` We refer to this format as `DENSE`. DENSE stores one line for each row and the values in each row are separated by white spaces. 
+- `Coordinate List Format:` We refer to this format as `COO`. COO stores a list of (row, column, value) tuples. The indices are sorted by row index then column index. The column and row indices are 0-based.
+- `List of Lists`:  We refer to this format as `LIL`. LIL stores one list per row, with each entry containing the column index and the value. Entries are comma separated.
+ 
+The user can specify the output Format using the option `-DoutFmt` that will be described later in this document.
 
 Running sPCA in the local mode
 =====================================
@@ -92,5 +97,5 @@ This command runs sPCA on top of Spark in the local machine with one worker thre
 -	`<number of principal components>:` Number of desired principal components 
 -	`[<Error sampling rate>](optional):` The error sampling rate [0-1] that is used for computing the error, It can be set to 0.01 to compute the error for only a small sample of the matrix, this speeds up the computations significantly 
 - `[<max iterations>] (optional):` Maximum number of iterations before terminating, the default is 3
-- `[<output format>] (optional):` One of three supported output formats (DENSE/COO/LIL), the default is DENSE. See Section Input/Output formats for more details.
+- `[<output format>] (optional):` One of three supported output formats (DENSE/COO/LIL), the default is DENSE. See Section Output Format for more details.
 - `[<0/1 (compute projected matrix or not)>] (optional)` :  0 or 1 value that specifies whether the user wants to project the input matrix on the principal components or not. 1 means that the projected matrix will be computed, and 0 means it will not be computed. The projected matrix is written in the output folder specified  by `-DOutput`
