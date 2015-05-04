@@ -44,7 +44,27 @@ To make sure that the code is build successfully, You should see something like 
 ```
 Moreover, you will find a .jar file generated under `sPCA/spca-spark/target/SparkPCA.jar`. This jar file will be used to run the example in the following step.
 
-Input/Output Formats
+Input Format
+=====================================
+sPCA accepts the input matrix in the Hadoop [SequenceFile](http://hadoop.apache.org/docs/r2.6.0/api/org/apache/hadoop/io/SequenceFile.html) format. However,sPCA provides an auxiliary class to convert two other formats in to the SequenceFile format. The two formats are:
+- `Dense Matrix Format:` We refer to this format as `DENSE`. Each row of the matrix is stored in one line and the elements in each row are separated by white spaces. The input can be one file or a directory with multiple files.
+- `Coordinate List Format:` We refer to this format as `COO`. COO stores a list of (row, column, value) tuples. The indices are sorted by row index then column index. The input can be one file or a directory with multiple files.
+
+The repository contains some examples from both formats under the directory `sPCA/spca-spark/input`. The following shows an example of how to convert them to the SequenceFile format:
+```
+java -classpath target/sparkPCA-1.0.jar -DInput=input/mat.txt -DInputFmt=DENSE -DOutput=output/dense -DCardinality=5 org.qcri.sparkpca.FileFormat
+
+java -classpath target/sparkPCA-1.0.jar -DInput=input/coo_0-based.txt -DInputFmt=COO -DOutput=output/coo_0-based -DBase=0 -DCardinality=5 org.qcri.sparkpca.FileFormat
+```
+The parameters are described as follows:
+- `-DInput:` File or directory that contains the matrix that will be converted.
+- `-DInputFmt:` Format of the input matrix. As described above, there are two supported formats (DENSE & COO).
+- `-DOutput:` Output folder where the converted matrix will be written.
+- `-DBase:` 0 or 1 values that specifies whether the row and column indices are 0-based or 1-based.
+- `-DCardinality:` The number of columns of the input matrix.
+
+
+Output Format
 =====================================
 
 
@@ -61,11 +81,11 @@ You can then run the example through the following command:
 where `local` means that the Spark code will run on the local machine. If the examples runs correctly, you should see a message saying `Principal components computed successfully`. The output will be written in `./sPCA/spca-spark/output/`.
 The example involves a command similar to the following:
 ```
-$SPARK_HOME/bin/spark-submit --class org.qcri.sparkpca.SparkPCA --master <master_url> --driver-java-options "-DInput=<path/to/input/matrix>s-DOutput=<path/to/outputfolder> -DRows=<number of rows> -DCols=<number of columns> -DPCs= <number of principal components> [-DErrSampleRate=<Error sampling rate>] [-DMaxIter=<max iterations>] [-DOutFmt=<output format>] [-DOutFmt=<output format> [-DComputeProjectedMatrix=<0/1 (compute projected matrix or not)>]" target/sparkPCA-1.0.jar 
+$SPARK_HOME/bin/spark-submit --class org.qcri.sparkpca.SparkPCA --master <master_url> --driver-java-options "-DInput=<path/to/input/matrix> -DOutput=<path/to/outputfolder> -DRows=<number of rows> -DCols=<number of columns> -DPCs= <number of principal components> [-DErrSampleRate=<Error sampling rate>] [-DMaxIter=<max iterations>] [-DOutFmt=<output format>] [-DOutFmt=<output format> [-DComputeProjectedMatrix=<0/1 (compute projected matrix or not)>]" target/sparkPCA-1.0.jar 
 ```
 This command runs sPCA on top of Spark in the local machine with one worker thread. The following is a description of the command-line arguments of sPCA. 
 - `<master-url>: `The master URL for the cluster (e.g. spark://23.195.26.187:7077), it is set to `local[K]` for running Spark in the local mode with *K* threads (ideally, set *K* to the number of cores on your machine). If this argument is set to `local`, the applications runs locally on one worker thread (i.e., no parlellism at all).
--	`<path/to/input/matrix>:` File or directory that contains an example input matrix in the sequenceFileFormat `<IntWritable key, VectorWritable value>`.
+-	`<path/to/input/matrix>:` File or directory that contains an input matrix in the sequenceFileFormat `<IntWritable key, VectorWritable value>`.
 -	`<path/to/outputfolder>:` The directory where the resulting principal components is written
 -	`<number of rows>:` Number of rows for the input matrix 
 -	`<number of columns>:` Number of columns for the input matrix 
