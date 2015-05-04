@@ -79,44 +79,44 @@ public class SparkPCA implements Serializable {
 		final int nPCs;
 		
 		try {
-			inputPath=System.getProperty("Input");
+			inputPath=System.getProperty("i");
 			if(inputPath==null)
 				throw new IllegalArgumentException();
 		}
 		catch(Exception e) {
-			printLogMessage("Input");
+			printLogMessage("i");
 			return;
 		}
 		try {
-			outputPath=System.getProperty("Output");
+			outputPath=System.getProperty("o");
 			if(outputPath==null)
 				throw new IllegalArgumentException();
 		}
 		catch(Exception e) {
-			printLogMessage("Output");
+			printLogMessage("o");
 			return;
 		}
 		
 		try {
-			nRows=Integer.parseInt(System.getProperty("Rows"));
+			nRows=Integer.parseInt(System.getProperty("rows"));
 		}
 		catch(Exception e) {
-			printLogMessage("Rows");
+			printLogMessage("rows");
 			return;
 		}
 		
 		try {
-			nCols=Integer.parseInt(System.getProperty("Cols"));
+			nCols=Integer.parseInt(System.getProperty("cols"));
 		}
 		catch(Exception e) {
-			printLogMessage("Cols");
+			printLogMessage("cols");
 			return;
 		}
 		try {
-			nPCs=Integer.parseInt(System.getProperty("PCs"));
+			nPCs=Integer.parseInt(System.getProperty("pcs"));
 		}
 		catch(Exception e) {
-			printLogMessage("PCs");
+			printLogMessage("pcs");
 			return;
 		}
 		/**
@@ -127,7 +127,7 @@ public class SparkPCA implements Serializable {
 		 OutputFormat outputFileFormat=OutputFormat.DENSE;
 		 int computeProjectedMatrix=0;
 	     try {
-	    	 errRate= Float.parseFloat(System.getProperty("ErrSampleRate"));
+	    	 errRate= Float.parseFloat(System.getProperty("errSampleRate"));
 	     }
 	     catch(Exception e) {
 	    	
@@ -136,27 +136,27 @@ public class SparkPCA implements Serializable {
 	    		 errRate= 1;
 	         else
 	        	 errRate=1/Math.pow(10, length-4);
-	    	 log.warn("error sampling rate set to:  ErrSampleRate=" + errRate);
+	    	 log.warn("error sampling rate set to:  errSampleRate=" + errRate);
 	     }
 	     try {
-	    	 maxIterations=Integer.parseInt(System.getProperty("MaxIter"));
+	    	 maxIterations=Integer.parseInt(System.getProperty("maxIter"));
 	     }
 	     catch(Exception e) {
 	    	 log.warn("maximum iterations is set to default: maximum Iterations=" + maxIterations);
 	     }
 	     
 	     try {
-	    	 outputFileFormat=OutputFormat.valueOf(System.getProperty("OutFmt"));
+	    	 outputFileFormat=OutputFormat.valueOf(System.getProperty("outFmt"));
 	     }
 	     catch(IllegalArgumentException e) {
-	    	 log.warn("Invalid Format " + System.getProperty("OutFmt") +  ", Default output format"  + outputFileFormat + " will be used ");
+	    	 log.warn("Invalid Format " + System.getProperty("outFmt") +  ", Default output format"  + outputFileFormat + " will be used ");
 	     }
 	     catch(Exception e) {
 	    	 log.warn("Default output format "  + outputFileFormat + " will be used ");
 	     }
 	     
 	     try {
-	    	 computeProjectedMatrix=Integer.parseInt(System.getProperty("ComputeProjectedMatrix"));
+	    	 computeProjectedMatrix=Integer.parseInt(System.getProperty("computeProjectedMatrix"));
 	     }
 	     catch(Exception e) {
 	    	 log.warn("Projected Matrix will not be computed, the output path will contain the principal components only");
@@ -647,6 +647,6 @@ public class SparkPCA implements Serializable {
 	 private static void printLogMessage(String argName )
 	 {
 		log.error("Missing arguments -D" + argName);
-		log.info("Usage: -DInput=<path/to/input/matrix> -DOutput=<path/to/outputfile> -DRows=<number of rows> -DCols<number of columns> -DPCs<number of principal components> -DErr=[Error sampling rate] -DMaxIter=[max iterations]"); 
+		log.info("Usage: -Di=<path/to/input/matrix> -Do=<path/to/outputfolder> -Drows=<number of rows> -Dcols=<number of columns> -Dpcs=<number of principal components> [-DerrSampleRate=<Error sampling rate>] [-DmaxIter=<max iterations>] [-DoutFmt=<output format>] [-DComputeProjectedMatrix=<0/1 (compute projected matrix or not)>]"); 
 	 }
 }
