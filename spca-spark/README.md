@@ -1,7 +1,7 @@
 sPCA-spark
 ===========
 
-sPCA-spark is a scalable implementation of Principal component analysis (PCA) algorithm on top of Spark. sPCA has been tested on Apache Spark 1.0.0 and Linux OS. In the following, we will take you through running PCA on a toy matrix. We will use Spark local mode which does not require setting up a cluster.
+sPCA-spark is a scalable implementation of Principal component analysis (PCA) algorithm on top of Spark. sPCA has been tested on Apache Spark 1.0.0. In the following, we will take you through running PCA on a toy matrix. We will use Spark local mode which does not require setting up a cluster.
 
 Download and Install Spark
 ==========================
