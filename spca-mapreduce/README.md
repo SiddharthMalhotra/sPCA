@@ -1,7 +1,7 @@
 sPCA-mapreduce
 ===========
 
-sPCA-mapreduce is a scalable implementation of Principal component analysis (PCA) algorithm on top of MapReduce. sPCA-mapreduce has been tested on Hadoop 0.20.204 & Hadoop 2.4.0. In the following, we will take you through running PCA on a toy matrix. We will run the example on the local machine without the need for setting up a cluster.
+sPCA-mapreduce is a scalable implementation of Principal component analysis (PCA) algorithm on top of MapReduce. sPCA-mapreduce has been tested on Hadoop 0.20.204 & Hadoop 2.4.0. In the following, we will take you through running sPCA-mapreduce on a toy matrix. We will run the example on the local machine without the need for setting up a cluster.
 
 Download and Install Hadoop
 ==========================
