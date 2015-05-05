@@ -37,7 +37,7 @@ Input/Output Format
 =====================================
 sPCA accepts the input matrix and writes the output in the Hadoop [SequenceFile](http://hadoop.apache.org/docs/r2.6.0/api/org/apache/hadoop/io/SequenceFile.html) format. 
 
-Running sPCA in the local mode
+Running sPCA-spark in the local mode
 =====================================
 The next step is to run sPCA-mapreduce on a small toy matrix. There is an example script located in `sPCA/spca-mapreduce/spca-mapreduce_example.sh`. First, you need to set the environment variable `HADOOP_HOME` to the directory where Hadoop is downloaded and installed:
 ```
