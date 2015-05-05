@@ -49,14 +49,14 @@ $HADOOP_HOME/bin/hadoop fs -copyFromLocal sPCA/spca-mapreduce/input/seqfiles/ hd
 ```
 You can then run the example through the following command:
 ```
-./sPCA/spca-mapreduce/spca-mapreduce_example.sh
+sPCA/spca-mapreduce/spca-mapreduce_example.sh
 ```
 The output will be written in the hdfs directory `hdfs:///user/<username>/output`. The example involves a command similar to the following:
 ```
 hadoop jar target/mapreducePCA-1.0-job.jar org.qcri.pca.SPCADriver \
 -i <path/to/input/matrix/on/hdfs> -o <path/to/outputfolder/on/hdfs> -rows <number of rows> -cols <number of columns> -pcs <number of principal components> [-errSampleRate=<Error sampling rate>] [-maxIter=<max iterations>] [-normalize<0/1 (normalize input matrix or not)>]
 ```
-This command runs sPCA-mapreduce on top of MapReduce in the local machine. The following is a description of the command-line arguments of sPCA. 
+This command runs sPCA-mapreduce on top of MapReduce in the local machine. The following is a description of the command-line arguments of sPCA:
 - ```<path/to/input/matrix/on/hdfs>: ```Hdfs directory that contains an example input matrix in the sequenceFileFormat <IntWritable key, VectorWritable value>.
 - ```<path/to/outputfolder/on/hdfs>:``` Hdfs directory where the resulting principal components is written
 - ```<number of rows>:``` Number of rows for the input matrix
