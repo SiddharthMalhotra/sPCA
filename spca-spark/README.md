@@ -75,13 +75,13 @@ The user can specify the output Format using the option `-DoutFmt` that will be 
 
 Running sPCA in the local mode
 =====================================
-The next step is to run sPCA on a small toy matrix. There is an example script located in `sPCA/spca-spark/spca-example.sh`. First, you need to set the environment variable `SPARK_HOME` to the directory where Spark is downloaded and installed:
+The next step is to run sPCA on a small toy matrix. There is an example script located in `sPCA/spca-spark/spca-spark_example.sh`. First, you need to set the environment variable `SPARK_HOME` to the directory where Spark is downloaded and installed:
 ```
 export SPARK_HOME=<path/to/spark/directory> (e.g., /usr/lib/spark-1.0.0)
 ```
 You can then run the example through the following command:
 ```
-./sPCA/spca-spark/spca-example.sh local
+./sPCA/spca-spark/spca-spark_example.sh local
 ```
 where `local` means that the Spark code will run on the local machine. If the examples runs correctly, you should see a message saying `Principal components computed successfully`. The output will be written in `./sPCA/spca-spark/output/`.
 The example involves a command similar to the following:
