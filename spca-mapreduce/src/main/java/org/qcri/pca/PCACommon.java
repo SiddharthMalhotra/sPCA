@@ -62,7 +62,14 @@ class PCACommon {
   static double randSS() {
     return random.nextDouble();
   }
-
+  /**
+	 * @return hard-coded initialization variance used for validation 
+  */
+	static double randValidationSS() {
+		// return random.nextDouble();
+		return 0.9644868606768501;
+	}
+	
   /**
    * A randomly initialized matrix
    * @param rows
@@ -80,6 +87,24 @@ class PCACommon {
     return randM;
   }
 
+  /** A hard-coded initialization matrix used for validation
+	 * 
+	 * @param rows
+	 * @param cols
+	 * @return
+  */
+
+	static Matrix randomValidationMatrix(int rows, int cols) {
+		double randomArray[][] = {
+				{ 0.730967787376657, 0.24053641567148587, 0.6374174253501083 },
+				{ 0.5504370051176339, 0.5975452777972018, 0.3332183994766498 },
+				{ 0.3851891847407185, 0.984841540199809, 0.8791825178724801 },
+				{ 0.9412491794821144, 0.27495396603548483, 0.12889715087377673 },
+				{ 0.14660165764651822, 0.023238122483889456, 0.5467397571984656 } };
+		DenseMatrix matrix = new DenseMatrix(randomArray);
+		return matrix;
+	}
+	
   /**
    * should it pass a record during sampling
    * @param sampleRate

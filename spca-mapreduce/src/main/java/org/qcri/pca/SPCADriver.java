@@ -138,13 +138,13 @@ public class SPCADriver extends AbstractJob {
   }
 
   public void run(Configuration conf, Path input, Path output, final int nRows,
-      final int nCols, final int nPCs, final int splitFactor, final float errRate, final int maxIterations, final int normalize, final boolean runSequential)
+      final int nCols, final int nPCs, final int splitFactor, final float errSampleRate, final int maxIterations, final int normalize, final boolean runSequential)
       throws Exception {
     System.gc();
     if (runSequential)
       runSequential(conf, input, output, nRows, nCols, nPCs);
     else
-      runMapReduce(conf, input, output, nRows, nCols, nPCs, splitFactor, errRate, maxIterations, normalize);
+      runMapReduce(conf, input, output, nRows, nCols, nPCs, splitFactor, errSampleRate, maxIterations, normalize);
   }
 
   /**
@@ -168,7 +168,7 @@ public class SPCADriver extends AbstractJob {
    * @throws Exception
    */
   double runMapReduce(Configuration conf, Path input, Path output, final int nRows,
-      final int nCols, final int nPCs, final int splitFactor, final float errRate, final int maxIterations, final int normalize) throws Exception {
+      final int nCols, final int nPCs, final int splitFactor, final float errSampleRate, final int maxIterations, final int normalize) throws Exception {
     Matrix centC = PCACommon.randomMatrix(nCols, nPCs);
     double ss = PCACommon.randSS();
     InitialValues initVal = new InitialValues(centC, ss);
@@ -183,7 +183,7 @@ public class SPCADriver extends AbstractJob {
      * runMapReduce(conf, distY, initVal, ..., 14, 1, 1);
      */
     double error = runMapReduce(conf, distY, initVal, output, nRows, nCols, nPCs,
-        splitFactor, 1, maxIterations, 1);
+        splitFactor, errSampleRate, maxIterations, normalize);
     return error;
   }
 
@@ -215,7 +215,7 @@ public class SPCADriver extends AbstractJob {
    */
   double runMapReduce(Configuration conf, DistributedRowMatrix distY,
       InitialValues initVal, Path output, final int nRows, final int nCols,
-      final int nPCs, final int splitFactor, final int errSampleRate, final int LAST_ROUND,
+      final int nPCs, final int splitFactor, final float errSampleRate, final int LAST_ROUND,
       final int normalize) throws Exception {
     int round = 0;
     //The two PPCA variables that improve over each iteration
