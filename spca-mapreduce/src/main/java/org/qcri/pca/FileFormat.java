@@ -3,6 +3,7 @@ package org.qcri.pca;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
+import java.io.IOException;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
@@ -15,6 +16,7 @@ import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorWritable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.apache.hadoop.util.GenericOptionsParser;
 
 
 public class FileFormat {
@@ -33,6 +35,7 @@ public class FileFormat {
 		final int cardinality;
 		final String outputPath;
 		final InputFormat inputFormat;
+		
 		try {
 			inputPath=System.getProperty("Input");
 			if(inputPath==null)

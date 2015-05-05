@@ -270,7 +270,8 @@ public class SPCADriver extends AbstractJob {
     double prevObjective = Double.MAX_VALUE;
     double error = 0;
     double relChangeInObjective = Double.MAX_VALUE;
-    for (; (round < LAST_ROUND && relChangeInObjective > threshold); round ++) {
+    double prevError = Double.MAX_VALUE;
+    for (; (round < LAST_ROUND && relChangeInObjective > threshold && prevError > 0.02); round ++) {
       // Sx = inv( ss * eye(d) + CtC );
       Matrix centralSx = centralCtC.clone();
       centralSx.viewDiagonal().assign(Functions.plus(ss));
@@ -340,6 +341,7 @@ public class SPCADriver extends AbstractJob {
         error = errJob.reconstructionErr(distY, distY2X, distC, centralC, ym,
             xm, errSampleRate, conf, getTempPath(), "" + round);
         log.info("... end of computing the error at round " + round);
+        prevError=error;
       }
     }
 

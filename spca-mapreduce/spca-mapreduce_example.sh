@@ -17,4 +17,4 @@
 #	<0/1 (normalize input matrix or not)>](optional) : 0 or 1 values that specifies whether the input matrix needs to be normalized or not. 1 means that the matrix should be normalized, 0 means that matrix should not be normalized. Normalization is done by dividing each column by (column_max-column_min)
 
 LOG=example.log
-$HADOOP_HOME/bin/hadoop jar target/spca-1.0-SNAPSHOT-job.jar org.qcri.pca.SPCADriver -D mapred.cluster.map.memory.mb=3072 -D mapred.job.map.memory.mb=3072 -D mapreduce.map.memory.mb=3072 -D mapred.task.timeout=6000000 -D mapred.healthChecker.script.timeout=30000 -D mapred.job.reuse.jvm.num.tasks=1  -i seqfiles -o output --tempDir tmp  -rows 7 -cols 5 -pcs 3 -errSampleRate 1 2>&1 | tee $LO
+$HADOOP_HOME/bin/hadoop jar target/spca-1.0-SNAPSHOT-job.jar org.qcri.pca.SPCADriver -D mapred.cluster.map.memory.mb=3072 -D mapred.job.map.memory.mb=3072 -D mapreduce.map.memory.mb=3072 -D mapred.task.timeout=6000000 -D mapred.healthChecker.script.timeout=30000 -D mapred.job.reuse.jvm.num.tasks=1  -i seqfiles -o output --tempDir tmp  -rows 7 -cols 5 -pcs 3 -errSampleRate 1 2>&1 | tee $LOG

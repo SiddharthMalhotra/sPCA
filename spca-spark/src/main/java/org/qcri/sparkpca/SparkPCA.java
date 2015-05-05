@@ -366,9 +366,11 @@ public class SparkPCA implements Serializable {
 	  double prevObjective = Double.MAX_VALUE;
 	  double error = 0;
 	  double relChangeInObjective = Double.MAX_VALUE;
+	  double prevError=Double.MAX_VALUE;
 	  final float threshold = 0.00001f;
 	  final int firstRound=round;
-	  for (; (round < maxIterations && relChangeInObjective > threshold); round++) {
+	  
+	  for (; (round < maxIterations && relChangeInObjective > threshold && prevError > 0.02); round++) {
 
 		    // Sx = inv( ss * eye(d) + CtC );
 		    Matrix centralSx = centralCtC.clone();
@@ -624,6 +626,8 @@ public class SparkPCA implements Serializable {
 		          
 		          error = reconstructionError/centralizedYNorm;
 		          log.info("... end of computing the error at round " + round + " And error=" + error);
+		          
+		          prevError=error;
 		      }
 	    }
 	    if(computeProjectedMatrix==1)
