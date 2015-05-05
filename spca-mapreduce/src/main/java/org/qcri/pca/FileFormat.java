@@ -3,7 +3,6 @@ package org.qcri.pca;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
-import java.io.IOException;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
@@ -17,7 +16,7 @@ import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorWritable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.apache.hadoop.util.GenericOptionsParser;
+import org.apache.hadoop.util.ToolRunner;
 
 
 public class FileFormat extends AbstractJob {
@@ -104,75 +103,12 @@ public class FileFormat extends AbstractJob {
 			}
 			return 0;
 	}
-	 public static int main(String[] args) {
-		 final String inputPath;
-			final int cardinality;
-			final String outputPath;
-			final InputFormat inputFormat;
-			try {
-				inputPath=System.getProperty("Input");
-				if(inputPath==null)
-					throw new IllegalArgumentException();
-			}
-			catch(Exception e) {
-				printLogMessage("Input");
-				return -1;
-			}
-			try {
-				inputFormat=InputFormat.valueOf(System.getProperty("InputFmt"));
-			}
-			catch(IllegalArgumentException e) {
-			    	 log.warn("Invalid Format " + System.getProperty("InputFmt") );
-			    	 return -1;
-			}
-			catch(Exception e) {
-			    	printLogMessage("InputFmt");
-			    	return -1;
-			}
-			try {
-				outputPath=System.getProperty("Output");
-				if(outputPath==null)
-					throw new IllegalArgumentException();
-				File outputFile=new File(outputPath);
-				if( outputFile.isFile() || outputFile==null )
-				{
-					log.error("Output Path must be a directory, " + outputPath + " is either not a directory or not a valid path");
-					return -1;
-				}
-			}
-			catch(Exception e) {
-				printLogMessage("Output");
-				return -1;
-			}
-			try {
-				cardinality=Integer.parseInt(System.getProperty("Cardinality"));
-			}
-			catch(Exception e) {
-				printLogMessage("Cardinality");
-				return -1;
-			}
-			int base=-1;
-			try {
-				base=Integer.parseInt(System.getProperty("Base"));
-			}
-			catch(Exception e) {
-				log.warn("It is not specified whether the input is zero-based or one-based, this parameter is useful only if the input is in COO format");
-			}
-			
-			switch(inputFormat)
-			{
-				case COO:
-					if(base==-1) {
-						log.error("You have to specify whether the rows and columns IDs start with 0 or 1 using the argument -DBase");
-						return -1;
-					}
-					convertFromCooToSeq(inputPath,cardinality,base,outputPath);
-					break;
-				case DENSE:
-					convertFromDenseToSeq(inputPath,cardinality,outputPath);
-					break;
-			}
-			return 0;
+	 public static void main(String[] args) {
+		 try {
+			ToolRunner.run(new Configuration(), new SPCADriver(), args);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 	}
 	public static void convertFromDenseToSeq(String inputPath, int cardinality, String outputFolderPath)
 	{
