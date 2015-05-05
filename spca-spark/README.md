@@ -1,7 +1,7 @@
-sPCA-Spark
+sPCA-spark
 ===========
 
-Scalable PCA (sPCA) is a scalable implementation of Principal component analysis (PCA) algorithm on top of Spark. sPCA has been tested on Apache Spark 1.0.0 and Linux OS. It should work with more recent Spark versions with only minor modifications; however, switching to another platform (e.g., Mac) will require recompiling the jars. In the following, we will take you through running PCA on a toy matrix. We will use Spark local mode which does not require setting up a cluster.
+sPCA-spark is a scalable implementation of Principal component analysis (PCA) algorithm on top of Spark. sPCA has been tested on Apache Spark 1.0.0 and Linux OS. In the following, we will take you through running PCA on a toy matrix. We will use Spark local mode which does not require setting up a cluster.
 
 Download and Install Spark
 ==========================
@@ -30,7 +30,7 @@ command:
 ```
 mvn --version
 ```
-It should print out your installed version of Maven. After that, you can build sPCA by typing:
+It should print out your installed version of Maven. After that, you can build sPCA-spark by typing:
 
 ```
 cd sPCA/spca-spark
@@ -46,7 +46,7 @@ Moreover, you will find a .jar file generated under `sPCA/spca-spark/target/Spar
 
 Input Format
 =====================================
-sPCA accepts the input matrix in the Hadoop [SequenceFile](http://hadoop.apache.org/docs/r2.6.0/api/org/apache/hadoop/io/SequenceFile.html) format. However,sPCA provides an auxiliary class to convert two other formats in to the SequenceFile format. The two formats are:
+sPCA-spark accepts the input matrix in the Hadoop [SequenceFile](http://hadoop.apache.org/docs/r2.6.0/api/org/apache/hadoop/io/SequenceFile.html) format. However, sPCA-spark provides an auxiliary class to convert two other formats in to the SequenceFile format. The two formats are:
 - `Dense Matrix Format:` We refer to this format as `DENSE`. DENSE stores one line for each row and the values in each row are separated by white spaces. The input can be one file or a directory with multiple files.
 - `Coordinate List Format:` We refer to this format as `COO`. COO stores a list of (row, column, value) tuples. The indices are sorted by row index then column index. The input can be one file or a directory with multiple files.
 
@@ -73,22 +73,22 @@ sPCA supports three types of output format, one for dense matrices, and two for 
  
 The user can specify the output Format using the option `-DoutFmt` that will be described later in this document.
 
-Running sPCA in the local mode
+Running sPCA-spark in the local mode
 =====================================
-The next step is to run sPCA on a small toy matrix. There is an example script located in `sPCA/spca-spark/spca-spark_example.sh`. First, you need to set the environment variable `SPARK_HOME` to the directory where Spark is downloaded and installed:
+The next step is to run sPCA-spark on a small toy matrix. There is an example script located in `sPCA/spca-spark/spca-spark_example.sh`. First, you need to set the environment variable `SPARK_HOME` to the directory where Spark is downloaded and installed:
 ```
 export SPARK_HOME=<path/to/spark/directory> (e.g., /usr/lib/spark-1.0.0)
 ```
 You can then run the example through the following command:
 ```
-./sPCA/spca-spark/spca-spark_example.sh local
+sPCA/spca-spark/spca-spark_example.sh local
 ```
 where `local` means that the Spark code will run on the local machine. If the examples runs correctly, you should see a message saying `Principal components computed successfully`. The output will be written in `./sPCA/spca-spark/output/`.
 The example involves a command similar to the following:
 ```
 $SPARK_HOME/bin/spark-submit --class org.qcri.sparkpca.SparkPCA --master <master_url> --driver-java-options "-Di=<path/to/input/matrix> -Do=<path/to/outputfolder> -Drows=<number of rows> -Dcols=<number of columns> -Dpcs=<number of principal components> [-DerrSampleRate=<Error sampling rate>] [-DmaxIter=<max iterations>] [-DoutFmt=<output format>] [-DComputeProjectedMatrix=<0/1 (compute projected matrix or not)>]" target/sparkPCA-1.0.jar 
 ```
-This command runs sPCA on top of Spark in the local machine with one worker thread. The following is a description of the command-line arguments of sPCA. 
+This command runs sPCA on top of Spark in the local machine with one worker thread. The following is a description of the command-line arguments of sPCA:
 - `<master-url>: `The master URL for the cluster (e.g. spark://23.195.26.187:7077), it is set to `local[K]` for running Spark in the local mode with *K* threads (ideally, set *K* to the number of cores on your machine). If this argument is set to `local`, the applications runs locally on one worker thread (i.e., no parlellism at all).
 -	`<path/to/input/matrix>:` File or directory that contains an input matrix in the sequenceFileFormat `<IntWritable key, VectorWritable value>`.
 -	`<path/to/outputfolder>:` The directory where the resulting principal components is written
