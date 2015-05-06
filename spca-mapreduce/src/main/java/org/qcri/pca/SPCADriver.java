@@ -353,6 +353,7 @@ public class SPCADriver extends AbstractJob {
     initVal.C = centralC;
     initVal.ss = ss;
     writeMatrix(initVal.C, output, getTempPath(), "PCs");
+    return error;
     
   }
 
