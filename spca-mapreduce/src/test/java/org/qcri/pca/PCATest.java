@@ -81,7 +81,7 @@ public class PCATest {// extends org.apache.mahout.common.MahoutTestCase {
       return;
     }
   }
-
+  
   @Test
   public void crossTestSequentialPPCAs() throws Exception {
     double jakobErr = ppcaDriver.runSequential_JacobVersion(conf, input,

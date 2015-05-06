@@ -352,15 +352,8 @@ public class SPCADriver extends AbstractJob {
 
     initVal.C = centralC;
     initVal.ss = ss;
-    System.out.println("***********C Befoooooore*****************" + initVal.C);
-    Configuration newConf= writeMatrix(initVal.C, output, getTempPath(), "PCs");
-    int matRows= initVal.C.numRows();
-    int matCols= initVal.C.numCols();
-    Path reReadPath=new Path(output.getName() + File.separator + "PCs" + matRows + "x" + matCols);
-    DistributedRowMatrix reRead = new DistributedRowMatrix(reReadPath,getTempPath(), matRows, matCols);
-    reRead.setConf(conf);
-    System.out.println("***********C Afteeeeeeeeeer*****************" + PCACommon.toDenseMatrix(reRead));
-    return error;
+    writeMatrix(initVal.C, output, getTempPath(), "PCs");
+    
   }
 
   static class InitialValues {
@@ -816,7 +809,7 @@ public class SPCADriver extends AbstractJob {
     }
     return sampleMatrix;
   }
-  static Configuration writeMatrix(Matrix origMatrix,
+  static void writeMatrix(Matrix origMatrix,
 	      Path outPath, Path tmpPath, String label) throws IOException {
 	    Configuration conf = new Configuration();
 	    Path outputDir = new Path(outPath, label + origMatrix.numRows() + "x"
@@ -839,7 +832,6 @@ public class SPCADriver extends AbstractJob {
 	    } else {
 	      log.warn("----------- Skip matrix " + outputDir + " - already exists");
 	    }
-	    return conf;
   }
 
   /**
