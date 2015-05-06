@@ -1,7 +1,7 @@
 sPCA
 ===========
 
-Scalable PCA (sPCA) is a scalable implementation of Principal component analysis (PCA) algorithm. sPCA achieves scalability via employing efficient large matrix operations, effectively leveraging matrix sparsity, and minimizing intermediate data. sPCA is implemented on top of Spark and MapReduce frameworks. The repository contains two README files that will take you through running sPCA on Spark and MapReduce: ([sPCA-Spark readme](spca-spark/README.md), [sPCA-mapreduce readme](spca-mapreduce/README.md))
+Scalable PCA (sPCA) is a scalable implementation of Principal component analysis (PCA) algorithm on of Spark and MapReduce. sPCA achieves scalability via employing efficient large matrix operations, effectively leveraging matrix sparsity, and minimizing intermediate data. The repository contains two README files that will take you through running sPCA on Spark and MapReduce, respectively: ([sPCA-Spark README](spca-spark/README.md), [sPCA-mapreduce README](spca-mapreduce/README.md))
 
 Resources
 ==========================
