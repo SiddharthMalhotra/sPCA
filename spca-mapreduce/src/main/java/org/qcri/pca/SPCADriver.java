@@ -10,12 +10,15 @@
 
 package org.qcri.pca;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.Iterator;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.io.IntWritable;
+import org.apache.hadoop.io.SequenceFile;
 import org.apache.hadoop.util.ToolRunner;
 import org.apache.mahout.common.AbstractJob;
 import org.apache.mahout.common.commandline.DefaultOptionCreator;
@@ -34,6 +37,7 @@ import org.apache.mahout.math.function.DoubleFunction;
 import org.apache.mahout.math.function.Functions;
 import org.apache.mahout.math.function.VectorFunction;
 import org.apache.mahout.math.hadoop.DistributedRowMatrix;
+import org.qcri.pca.FileFormat.InputFormat;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -348,6 +352,13 @@ public class SPCADriver extends AbstractJob {
 
     initVal.C = centralC;
     initVal.ss = ss;
+    System.out.println("***********C Befoooooore*****************" + initVal.C);
+    writeMatrix(initVal.C, output, getTempPath(), "PCs");
+    int matRows= initVal.C.numRows();
+    int matCols= initVal.C.numCols();
+    Path reReadPath=new Path(output.getName() + File.separator + "PCs" + matRows + "x" + matCols);
+    DistributedRowMatrix reRead = new DistributedRowMatrix(reReadPath,getTempPath(), matRows, matCols);
+    System.out.println("***********C Afteeeeeeeeeer*****************" + PCACommon.toDenseMatrix(reRead));
     return error;
   }
 
@@ -803,6 +814,30 @@ public class SPCADriver extends AbstractJob {
       }
     }
     return sampleMatrix;
+  }
+  static void writeMatrix(Matrix origMatrix,
+	      Path outPath, Path tmpPath, String label) throws IOException {
+	    Configuration conf = new Configuration();
+	    Path outputDir = new Path(outPath, label + origMatrix.numRows() + "x"
+	        + origMatrix.numCols());
+	    FileSystem fs = FileSystem.get(outputDir.toUri(), conf);
+	    if (!fs.exists(outputDir)) {
+	      Path outputFile = new Path(outputDir, "singleSliceMatrix");
+	      SequenceFile.Writer writer = new SequenceFile.Writer(fs, conf,
+	          outputFile, IntWritable.class, VectorWritable.class);
+	      VectorWritable vectorWritable = new VectorWritable();
+	      try {
+	        for (int r = 0; r < origMatrix.numRows(); r++) {
+	          Vector vector = origMatrix.viewRow(r);
+	          vectorWritable.set(vector);
+	          writer.append(new IntWritable(r), vectorWritable);
+	        }
+	      } finally {
+	        writer.close();
+	      }
+	    } else {
+	      log.warn("----------- Skip matrix " + outputDir + " - already exists");
+	    }
   }
 
   /**
