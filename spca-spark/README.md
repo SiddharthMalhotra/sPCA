@@ -90,7 +90,7 @@ $SPARK_HOME/bin/spark-submit --class org.qcri.sparkpca.SparkPCA --master <master
 ```
 This command runs sPCA on top of Spark in the local machine with one worker thread. The following is a description of the command-line arguments of sPCA:
 - `<master-url>: `The master URL for the cluster (e.g. spark://23.195.26.187:7077), it is set to `local[K]` for running Spark in the local mode with *K* threads (ideally, set *K* to the number of cores on your machine). If this argument is set to `local`, the applications runs locally on one worker thread (i.e., no parlellism at all).
--	`<path/to/input/matrix>:` File or directory that contains an input matrix in the sequenceFileFormat `<IntWritable key, VectorWritable value>`.
+-	`<path/to/input/matrix>:` File or directory that contains an input matrix in the SequenceFile Format `<IntWritable key, VectorWritable value>`.
 -	`<path/to/outputfolder>:` The directory where the resulting principal components is written
 -	`<number of rows>:` Number of rows for the input matrix 
 -	`<number of columns>:` Number of columns for the input matrix 
