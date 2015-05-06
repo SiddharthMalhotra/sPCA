@@ -83,7 +83,7 @@ You can then run the example through the following command:
 ```
 sPCA/spca-spark/spca-spark_example.sh local
 ```
-where `local` means that the Spark code will run on the local machine. If the examples runs correctly, you should see a message saying `Principal components computed successfully`. The output will be written in `./sPCA/spca-spark/output/`.
+where `local` means that the Spark code will run on the local machine. If the examples runs correctly, you should see a message saying `Principal components computed successfully`. The output will be written in `sPCA/spca-spark/output/`.
 The example involves a command similar to the following:
 ```
 $SPARK_HOME/bin/spark-submit --class org.qcri.sparkpca.SparkPCA --master <master_url> --driver-java-options "-Di=<path/to/input/matrix> -Do=<path/to/outputfolder> -Drows=<number of rows> -Dcols=<number of columns> -Dpcs=<number of principal components> [-DerrSampleRate=<Error sampling rate>] [-DmaxIter=<max iterations>] [-DoutFmt=<output format>] [-DComputeProjectedMatrix=<0/1 (compute projected matrix or not)>]" target/sparkPCA-1.0.jar 
