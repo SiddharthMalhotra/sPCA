@@ -31,13 +31,13 @@ To make sure that the code is build successfully, You should see something like 
 [INFO] BUILD SUCCESS
 [INFO] ------------------------------------------------------------------------
 ```
-Moreover, you will find a .jar file generated under `sPCA/spca-mapreduce/target/mapreducePCA-1.0.jar`. This jar file will be used to run the example in the following step.
+Moreover, you will find a .jar file generated under `sPCA/spca-mapreduce/target/mapreducePCA-1.0-job.jar`. This jar file will be used to run the example in the following step.
 
 Input/Output Format
 =====================================
 sPCA accepts the input matrix and writes the output in the Hadoop [SequenceFile](http://hadoop.apache.org/docs/r2.6.0/api/org/apache/hadoop/io/SequenceFile.html) format. 
 
-Running sPCA-spark in the local mode
+Running sPCA-mapreduce in the local mode
 =====================================
 The next step is to run sPCA-mapreduce on a small toy matrix. There is an example script located in `sPCA/spca-mapreduce/spca-mapreduce_example.sh`. First, you need to set the environment variable `HADOOP_HOME` to the directory where Hadoop is downloaded and installed:
 ```
@@ -57,7 +57,7 @@ hadoop jar target/mapreducePCA-1.0-job.jar org.qcri.pca.SPCADriver \
 -i <path/to/input/matrix/on/hdfs> -o <path/to/outputfolder/on/hdfs> -rows <number of rows> -cols <number of columns> -pcs <number of principal components> [-errSampleRate=<Error sampling rate>] [-maxIter=<max iterations>] [-normalize<0/1 (normalize input matrix or not)>]
 ```
 This command runs sPCA-mapreduce on top of MapReduce in the local machine. The following is a description of the command-line arguments of sPCA:
-- ```<path/to/input/matrix/on/hdfs>: ```Hdfs directory that contains an example input matrix in the sequenceFileFormat <IntWritable key, VectorWritable value>.
+- ```<path/to/input/matrix/on/hdfs>: ```Hdfs directory that contains an example input matrix in the SequenceFile Format `<IntWritable key, VectorWritable value>`.
 - ```<path/to/outputfolder/on/hdfs>:``` Hdfs directory where the resulting principal components is written
 - ```<number of rows>:``` Number of rows for the input matrix
 - ```<number of columns>:``` Number of columns for the input matrix
