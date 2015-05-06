@@ -2,7 +2,7 @@
 # Usage:
 #  hadoop jar target/mapreducePCA-1.0-job.jar \
 #  ... # other options
-#  -i=<path/to/input/matrix/on/hdfs> -o=<path/to/outputfolder/on/hdfs> -rows=<number of rows> -cols=<number of columns> -pcs=<number of principal components> [-DerrSampleRate=<Error sampling rate>] [-DmaxIter=<max iterations>] [-normalize<0/1 (normalize input matrix or not)>] 
+#  -i <path/to/input/matrix/on/hdfs> -o <path/to/outputfolder/on/hdfs> -rows <number of rows> -cols <number of columns> -pcs <number of principal components> [-errSampleRate=<Error sampling rate>] [-maxIter=<max iterations>] [-normalize<0/1 (normalize input matrix or not)>] 
 
 
 

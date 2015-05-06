@@ -1,3 +1,13 @@
+/**
+ * QCRI, sPCA LICENSE
+ * sPCA is a scalable implementation of Principal Component Analysis (PCA) on of Spark and MapReduce
+ *
+ * Copyright (c) 2015, Qatar Foundation for Education, Science and Community Development (on
+ * behalf of Qatar Computing Research Institute) having its principle place of business in Doha,
+ * Qatar with the registered address P.O box 5825 Doha, Qatar (hereinafter referred to as "QCRI")
+ *
+*/
+
 package org.qcri.pca;
 
 import java.io.BufferedReader;

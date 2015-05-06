@@ -1,2 +1,0 @@
-cat water-treatment.data | awk 'BEGIN{FS=","} {$1=""}1' | sed s/?/NaN/g > water.data
-
