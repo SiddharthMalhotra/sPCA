@@ -9,3 +9,11 @@ Resources
 - [arXiv technical report](http://arxiv.org/abs/1503.05214): Analysis of different methods for performing PCA and their limitations
                                                              in handling large-scale datasets on distributed clusters.
 - [SIGMOD paper](http://ds.qcri.org/images/profile/tarek_elgamal/sigmod2015.pdf): Comparison with the closest PCA implementations, Mahout/MapReduce and MLlib/Spark.
+
+License
+==========================
+sPCA is released under the terms of the [MIT License](http://opensource.org/licenses/MIT).
+
+Contact
+==========================
+For any issues or enhancement please use the [issue pages](https://github.com/Qatar-Computing-Research-Institute/sPCA/issues) in Github, or [contact us](mailto:tarek.elgamal@gmail.com). We will try our best to help you sort it out.
