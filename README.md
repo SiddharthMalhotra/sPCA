@@ -4,11 +4,11 @@ Scalable PCA (sPCA) is a scalable implementation of Principal component analysis
 
 People
 ==========================
-[Ashraf Aboulnaga](http://qcri.org.qa/page?a=117&name=Ashraf_Aboulnaga&pid=110&lang=en-CA)
-[Mohamed Hefeeda](http://qcri.org.qa/page?a=117&pid=29&lang=en-CA)
-Tarek Elgamal
-Maysam Yabandeh
-Waleed Mustafa
+- [Ashraf Aboulnaga](http://qcri.org.qa/page?a=117&name=Ashraf_Aboulnaga&pid=110&lang=en-CA)
+- [Mohamed Hefeeda](http://qcri.org.qa/page?a=117&pid=29&lang=en-CA)
+- Tarek Elgamal
+- Maysam Yabandeh
+- Waleed Mustafa
 
 Publications
 ==========================
