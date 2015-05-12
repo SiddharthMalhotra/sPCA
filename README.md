@@ -12,9 +12,9 @@ People
 
 Publications
 ==========================
-- T. Elgamal, M. Yabandeh, A. Aboulnaga, W. Mustafa, and M. Hefeeda. sPCA: Scalable Principal Component Analysis fo Big Data on Distributed Platforms. In Proc. of ACM  SIGMOD’15, Melbourne, Australia,  May 2015. [[pdf](http://ds.qcri.org/images/profile/tarek_elgamal/sigmod2015.pdf)] [[bibtex](ds.qcri.org/images/profile/tarek_elgamal/sigmod2015.bib)]  
+- T. Elgamal, M. Yabandeh, A. Aboulnaga, W. Mustafa, and M. Hefeeda. sPCA: Scalable Principal Component Analysis fo Big Data on Distributed Platforms. In Proc. of ACM  SIGMOD’15, Melbourne, Australia,  May 2015. [[pdf](http://ds.qcri.org/images/profile/tarek_elgamal/sigmod2015.pdf)] [[bibtex](ds.qcri.org/images/profile/tarek_elgamal/sigmod2015.txt)]  
 
-- T. Elgamal and M. Hefeeda. Analysis of PCA Algorithms in Distributed Environments. Technical Report arXiv:1503.05214. [[pdf](http://arxiv.org/abs/1503.05214)][[bibtex](ds.qcri.org/images/profile/tarek_elgamal/spca_techreport.bib)] 
+- T. Elgamal and M. Hefeeda. Analysis of PCA Algorithms in Distributed Environments. Technical Report arXiv:1503.05214. [[pdf](http://arxiv.org/abs/1503.05214)][[bibtex](ds.qcri.org/images/profile/tarek_elgamal/spca_techreport.txt)] 
 
 License
 ==========================
